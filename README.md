@@ -5,7 +5,7 @@
 
 ---
 
-| Problema Central | 📊 Base de Datos | 🌐 Solución Web |
+| Problema Central | Base de Datos | Solución Web |
 | :--- | :--- | :--- |
 | **Incertidumbre en lanzamientos:** Alto riesgo financiero y marketing genérico sin segmentar a los oyentes por contexto o estado anímico. | **85.000 canciones reales (2015-2025):** 19 atributos, 10 mercados globales y 12 géneros balanceados sin valores nulos. | **Aplicación Interactiva:** Web full-stack que clasifica potencial de Hit, perfila el cluster sonoro y entrega recomendaciones accionables. |
 
