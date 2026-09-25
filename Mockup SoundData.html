@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundPulse Analytics - Segmentación Global por Dataset Spotify</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        spotify: {
+                            green: '#1DB954',
+                            hover: '#1ed760',
+                            dark: '#121212',
+                            card: '#181818',
+                            cardHover: '#282828',
+                            lightText: '#b3b3b3'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1DB954;
+        }
+        .glass-panel {
+            background: rgba(24, 24, 24, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-black text-white font-sans antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-spotify-green selection:text-black">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-out flex items-center gap-3 bg-spotify-green text-black px-5 py-3 rounded-full font-bold shadow-2xl">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <span id="toast-message">Atributo actualizado con éxito</span>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-spotify-dark flex-shrink-0 flex flex-col justify-between p-4 border-r border-zinc-800">
+        <div>
+            <!-- App Logo -->
+            <div class="flex items-center gap-3 px-3 py-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-spotify-green flex items-center justify-center text-black text-2xl font-black shadow-lg shadow-spotify-green/30">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tight text-white leading-none">Sound<span class="text-spotify-green">Data</span></h1>
+                    <span class="text-[10px] text-zinc-400 font-medium tracking-wider uppercase">Dataset Analytics & Streams</span>
+                </div>
+            </div>
+
+            <!-- Active Dataset Status Banner -->
+            <div class="mb-5 p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-spotify-green opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-spotify-green"></span>
+                    </span>
+                    <div class="text-xs">
+                        <p class="font-semibold text-white">Dataset Conectado</p>
+                        <p id="sidebar-streams-badge" class="text-[10px] text-spotify-green font-mono">0 Oyentes Totales</p>
+                    </div>
+                </div>
+                <button onclick="reloadDefaultDataset()" title="Recargar Dataset Inicial" class="text-zinc-400 hover:text-spotify-green transition-colors p-1">
+                    <i id="sync-icon" class="fa-solid fa-rotate text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <nav class="space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-spotify-green/10 text-spotify-green">
+                    <i class="fa-solid fa-chart-pie text-lg w-5"></i>
+                    <span>Análisis de Oyentes</span>
+                </button>
+                <button onclick="switchTab('segmentation')" id="nav-segmentation" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all">
+                    <i class="fa-solid fa-sliders text-lg w-5"></i>
+                    <span>Segmentación por Atributo</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Summary -->
+        <div class="pt-4 border-t border-zinc-800 mt-6 text-xs text-zinc-400 space-y-2">
+            <div class="flex justify-between">
+                <span>Total Registros:</span>
+                <span id="sidebar-total-records" class="font-bold text-white">0</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Géneros Analizados:</span>
+                <span id="sidebar-total-genres" class="font-bold text-spotify-green">0</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Países en Dataset:</span>
+                <span id="sidebar-total-countries" class="font-bold text-white">0</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 flex flex-col min-w-0 bg-black overflow-y-auto">
+
+        <!-- Header Bar -->
+        <header class="sticky top-0 z-30 bg-black/80 backdrop-blur-md px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 id="header-title" class="text-2xl font-black text-white tracking-tight">Análisis Global de Oyentes (`stream_count`)</h2>
+                <p id="header-subtitle" class="text-xs text-zinc-400">Procesamiento y segmentación cuantitativa de reproducciones basadas en el dataset de Spotify.</p>
+            </div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="exportDatasetSummary()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-xs text-white font-semibold px-4 py-2.5 rounded-full border border-zinc-800 transition-all">
+                    <i class="fa-solid fa-file-export text-spotify-green"></i>
+                    <span>Exportar Resumen JSON</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 space-y-6 max-w-7xl w-full mx-auto">
+
+            <!-- TAB 1: DASHBOARD DE ANALISIS DE OYENTES -->
+            <div id="tab-dashboard" class="tab-content space-y-6">
+
+                <!-- High Level Stream Metrics KPI Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Total de Oyentes / Streams</p>
+                                <h3 id="kpi-total-streams" class="text-2xl font-black text-white mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-spotify-green/10 text-spotify-green rounded-xl">
+                                <i class="fa-solid fa-headphones text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center gap-1.5 text-[11px] text-spotify-green font-medium">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span id="kpi-total-records-count">Calculado sobre 0 canciones</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Género Más Escuchado</p>
+                                <h3 id="kpi-top-streamed-genre" class="text-2xl font-black text-white mt-1">-</h3>
+                            </div>
+                            <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
+                                <i class="fa-solid fa-record-vinyl text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-[11px] text-zinc-400 font-medium">
+                            <span id="kpi-genre-stream-share">0% del total de oyentes</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">País Líder en Oyentes</p>
+                                <h3 id="kpi-top-country" class="text-2xl font-black text-white mt-1">-</h3>
+                            </div>
+                            <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+                                <i class="fa-solid fa-globe text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-[11px] text-zinc-400 font-medium">
+                            <span id="kpi-country-streams-share">0 oyentes acaparados</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Popularidad Promedio</p>
+                                <h3 id="kpi-avg-popularity" class="text-2xl font-black text-white mt-1">0 / 100</h3>
+                            </div>
+                            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+                                <i class="fa-solid fa-fire text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-[11px] text-spotify-green font-medium">
+                            <span id="kpi-explicit-ratio">0% canciones explicit</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Genre Streams Bar Chart and Country Share Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Main Bar Chart: Stream Count per Genre -->
+                    <div class="lg:col-span-2 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-extrabold text-lg text-white">Volumen Total de Oyentes (`stream_count`) por Género</h3>
+                                <p class="text-xs text-zinc-400">Suma acumulada de oyentes para cada categoría musical</p>
+                            </div>
+                            <select id="genre-sort-select" onchange="updateApp()" class="bg-zinc-900 text-xs text-zinc-300 border border-zinc-700 rounded-lg px-3 py-1.5 focus:outline-none">
+                                <option value="streams">Ordenar por Oyentes</option>
+                                <option value="tracks">Ordenar por N° Canciones</option>
+                            </select>
+                        </div>
+                        <div class="relative h-64 sm:h-72 w-full">
+                            <canvas id="genreStreamsBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Doughnut Chart: Streams per Country -->
+                    <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
+                        <div class="mb-2">
+                            <h3 class="font-extrabold text-lg text-white">Distribución de Oyentes por País</h3>
+                            <p class="text-xs text-zinc-400">Participación de mercado según `country`</p>
+                        </div>
+                        <div class="relative h-56 w-full my-auto flex items-center justify-center">
+                            <canvas id="countryDoughnutChart"></canvas>
+                        </div>
+                        <div class="text-center pt-2">
+                            <span id="country-count-badge" class="text-xs text-zinc-400">0 Países Identificados</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Genre Stream Breakdown Grid Cards -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-extrabold text-white">Segmentación Detallada de Oyentes por Géneros</h3>
+                        <span class="text-xs text-zinc-400">Basado en el peso del `stream_count` acumulado</span>
+                    </div>
+
+                    <div id="genre-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- JS injects genre stream cards here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: SEGMENTACIÓN POR ATRIBUTO INDIVIDUAL -->
+            <div id="tab-segmentation" class="tab-content hidden space-y-6">
+
+                <!-- Attribute Selector Bar -->
+                <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <div>
+                            <span class="px-3 py-1 bg-spotify-green/20 text-spotify-green text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Análisis Univariado de Oyentes</span>
+                            <h3 class="text-2xl font-black text-white">Segmentación por Atributo Individual</h3>
+                            <p class="text-xs text-zinc-300 mt-1">Selecciona un atributo del dataset para calcular exactamente cuántos oyentes (`stream_count`) abarca cada categoría o rango.</p>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Pills Navigation -->
+                    <div class="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/80">
+                        <button onclick="selectIndividualAttribute('genre')" id="attr-btn-genre" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-spotify-green text-black shadow-md shadow-spotify-green/20">
+                            <i class="fa-solid fa-guitar mr-1.5"></i> Género (`genre`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('country')" id="attr-btn-country" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-globe mr-1.5"></i> País (`country`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('release_date')" id="attr-btn-release_date" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-calendar mr-1.5"></i> Año de Lanzamiento (`release_date`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('popularity')" id="attr-btn-popularity" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-fire mr-1.5"></i> Popularidad (`popularity`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('danceability')" id="attr-btn-danceability" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-drum mr-1.5"></i> Danceability
+                        </button>
+                        <button onclick="selectIndividualAttribute('energy')" id="attr-btn-energy" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-bolt mr-1.5"></i> Energy
+                        </button>
+                        <button onclick="selectIndividualAttribute('explicit')" id="attr-btn-explicit" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Explícito (`explicit`)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Selected Attribute Insights Summary KPI -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
+                        <p class="text-xs font-semibold text-zinc-400">Atributo en Análisis</p>
+                        <h4 id="single-attr-name" class="text-xl font-black text-spotify-green mt-1">Género Musical</h4>
+                        <p id="single-attr-desc" class="text-[11px] text-zinc-400 mt-1">Desglose por categoría `genre`</p>
+                    </div>
+
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
+                        <p class="text-xs font-semibold text-zinc-400">Segmento Dominante</p>
+                        <h4 id="single-attr-top-segment" class="text-xl font-black text-white mt-1">-</h4>
+                        <p id="single-attr-top-share" class="text-[11px] text-spotify-green font-mono mt-1">0 oyentes (0%)</p>
+                    </div>
+
+                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
+                        <p class="text-xs font-semibold text-zinc-400">Categorías / Bins Identificados</p>
+                        <h4 id="single-attr-count" class="text-xl font-black text-white mt-1">0</h4>
+                        <p class="text-[11px] text-zinc-400 mt-1">Grupos distintos analizados</p>
+                    </div>
+                </div>
+
+                <!-- Attribute Segment Visualization Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Bar Chart for Selected Attribute -->
+                    <div class="lg:col-span-2 bg-spotify-card p-6 rounded-2xl border border-zinc-800 flex flex-col justify-between">
+                        <div class="mb-4">
+                            <h3 id="single-attr-chart-title" class="font-extrabold text-lg text-white">Oyentes (`stream_count`) por Género Musical</h3>
+                            <p class="text-xs text-zinc-400">Comparativa cuantitativa de reproducciones acumuladas</p>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="singleAttributeBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Doughnut Distribution for Selected Attribute -->
+                    <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800 flex flex-col justify-between">
+                        <div class="mb-2">
+                            <h3 class="font-extrabold text-lg text-white">Proporción de Oyentes</h3>
+                            <p class="text-xs text-zinc-400">% de presencia en el dataset</p>
+                        </div>
+                        <div class="relative h-60 w-full my-auto flex items-center justify-center">
+                            <canvas id="singleAttributeDoughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranking & Detailed Segment Breakdown Table -->
+                <div class="bg-spotify-card rounded-2xl border border-zinc-800 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+                        <h3 class="font-extrabold text-base text-white">Tabla de Segmentación por <span id="table-attr-label" class="text-spotify-green">Género Musical</span></h3>
+                        <span class="text-xs text-zinc-400">Suma total de `stream_count` por categoría</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-zinc-300">
+                            <thead class="bg-zinc-900/90 text-zinc-400 uppercase font-bold border-b border-zinc-800">
+                                <tr>
+                                    <th class="py-3 px-4">Categoría / Valor</th>
+                                    <th class="py-3 px-4 text-right">Oyentes (`stream_count`)</th>
+                                    <th class="py-3 px-4 text-center">% del Total Global</th>
+                                    <th class="py-3 px-4 text-center">N° Canciones</th>
+                                    <th class="py-3 px-4 text-center">Popularidad Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="single-attribute-table-body" class="divide-y divide-zinc-800/60 font-mono">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        /*
+          Spotify Dataset matching schema from image:
+          release_date, genre, duration_ms, popularity, danceability, energy, key, loudness, mode, instrumentalness, tempo, stream_count, country, explicit, label
+        */
+        const defaultDataset = [
+            { id: 1, release_date: "21-03-2023", genre: "Country", duration_ms: 415975, popularity: 41, danceability: 77, energy: 65, key: 9, loudness: -4206, mode: 1, instrumentalness: 68, tempo: 1605, stream_count: 1000, country: "Germany", explicit: 0, label: "Columbia" },
+            { id: 2, release_date: "25-09-2018", genre: "Rock", duration_ms: 294399, popularity: 33, danceability: 18, energy: 74, key: 1, loudness: -1432, mode: 1, instrumentalness: 194, tempo: 1158, stream_count: 2000, country: "Australia", explicit: 0, label: "Universal Music" },
+            { id: 3, release_date: "24-03-2025", genre: "Hip-Hop", duration_ms: 377789, popularity: 35, danceability: 77, energy: 16, key: 6, loudness: -1159, mode: 0, instrumentalness: 186, tempo: 14773, stream_count: 1000, country: "Mexico", explicit: 0, label: "Independent" },
+            { id: 4, release_date: "17-05-2019", genre: "R&B", duration_ms: 180751, popularity: 39, danceability: 53, energy: 25, key: 5, loudness: -4745, mode: 0, instrumentalness: 685, tempo: 19734, stream_count: 1000, country: "India", explicit: 1, label: "Columbia" },
+            { id: 5, release_date: "19-08-2024", genre: "Country", duration_ms: 96720, popularity: 43, danceability: 7, energy: 5, key: 6, loudness: -236, mode: 1, instrumentalness: 331, tempo: 10382, stream_count: 1000, country: "Canada", explicit: 0, label: "Columbia" },
+            { id: 6, release_date: "10-06-2018", genre: "Rock", duration_ms: 93516, popularity: 34, danceability: 3, energy: 92, key: 10, loudness: -2444, mode: 1, instrumentalness: 304, tempo: 9141, stream_count: 1000, country: "Canada", explicit: 0, label: "Warner Music" },
+            { id: 7, release_date: "25-02-2025", genre: "Pop", duration_ms: 392799, popularity: 57, danceability: 26, energy: 72, key: 1, loudness: -5076, mode: 1, instrumentalness: 567, tempo: 10653, stream_count: 1000, country: "Japan", explicit: 1, label: "Columbia" },
+            { id: 8, release_date: "30-03-2020", genre: "Pop", duration_ms: 220093, popularity: 60, danceability: 82, energy: 87, key: 5, loudness: -2477, mode: 1, instrumentalness: 20, tempo: 12095, stream_count: 230000, country: "United Kingdom", explicit: 0, label: "Island Records" },
+            { id: 9, release_date: "05-07-2017", genre: "Reggaeton", duration_ms: 292401, popularity: 45, danceability: 88, energy: 81, key: 6, loudness: -3698, mode: 1, instrumentalness: 10, tempo: 9800, stream_count: 87000, country: "France", explicit: 1, label: "Warner Music" },
+            { id: 10, release_date: "16-12-2019", genre: "R&B", duration_ms: 382053, popularity: 48, danceability: 52, energy: 68, key: 7, loudness: -2195, mode: 1, instrumentalness: 279, tempo: 15171, stream_count: 32000, country: "France", explicit: 0, label: "Warner Music" },
+            { id: 11, release_date: "20-06-2021", genre: "Metal", duration_ms: 270685, popularity: 52, danceability: 36, energy: 95, key: 0, loudness: -1119, mode: 1, instrumentalness: 779, tempo: 14653, stream_count: 5000, country: "Japan", explicit: 0, label: "EMI" },
+            { id: 12, release_date: "22-08-2024", genre: "Jazz", duration_ms: 245994, popularity: 42, danceability: 71, energy: 49, key: 2, loudness: -384, mode: 0, instrumentalness: 545, tempo: 15274, stream_count: 11000, country: "Australia", explicit: 1, label: "XL Recordings" }
+        ];
+
+        let songDataset = JSON.parse(JSON.stringify(defaultDataset));
+
+        let activeTab = 'dashboard';
+        let currentSelectedAttr = 'genre';
+
+        let genreBarChart, countryDoughnutChart;
+        let singleAttrBarChart, singleAttrDoughnutChart;
+
+        window.onload = function() {
+            initDashboardCharts();
+            initSingleAttrCharts();
+            updateApp();
+        };
+
+        function reloadDefaultDataset() {
+            songDataset = JSON.parse(JSON.stringify(defaultDataset));
+            updateApp();
+            showToast("Dataset restablecido con los valores iniciales");
+        }
+
+        function updateApp() {
+            const genreMap = {};
+            const countryMap = {};
+            let totalStreams = 0;
+            let weightedPopSum = 0;
+            let explicitCount = 0;
+
+            songDataset.forEach(song => {
+                const streams = song.stream_count || 0;
+                totalStreams += streams;
+
+                // Genre Aggregations
+                if (!genreMap[song.genre]) genreMap[song.genre] = { streams: 0, count: 0 };
+                genreMap[song.genre].streams += streams;
+                genreMap[song.genre].count += 1;
+
+                // Country Aggregations
+                if (!countryMap[song.country]) countryMap[song.country] = 0;
+                countryMap[song.country] += streams;
+
+                weightedPopSum += (song.popularity || 0) * streams;
+
+                if (song.explicit === 1) explicitCount++;
+            });
+
+            const totalTracks = songDataset.length;
+
+            // Update Dashboard Main KPIs
+            document.getElementById('kpi-total-streams').innerText = totalStreams.toLocaleString();
+            document.getElementById('sidebar-streams-badge').innerText = `${totalStreams.toLocaleString()} Oyentes Totales`;
+            document.getElementById('kpi-total-records-count').innerText = `Calculado sobre ${totalTracks} registros`;
+
+            document.getElementById('sidebar-total-records').innerText = totalTracks;
+            document.getElementById('sidebar-total-genres').innerText = Object.keys(genreMap).length;
+            document.getElementById('sidebar-total-countries').innerText = Object.keys(countryMap).length;
+
+            // Sort genres
+            const sortMode = document.getElementById('genre-sort-select').value;
+            const sortedGenres = Object.keys(genreMap).map(g => ({
+                genre: g,
+                streams: genreMap[g].streams,
+                count: genreMap[g].count,
+                percentage: totalStreams ? ((genreMap[g].streams / totalStreams) * 100).toFixed(1) + '%' : '0%'
+            })).sort((a, b) => sortMode === 'streams' ? b.streams - a.streams : b.count - a.count);
+
+            if (sortedGenres.length > 0) {
+                document.getElementById('kpi-top-streamed-genre').innerText = sortedGenres[0].genre;
+                document.getElementById('kpi-genre-stream-share').innerText = `${sortedGenres[0].streams.toLocaleString()} oyentes (${sortedGenres[0].percentage})`;
+            } else {
+                document.getElementById('kpi-top-streamed-genre').innerText = "-";
+                document.getElementById('kpi-genre-stream-share').innerText = "0%";
+            }
+
+            // Top Country
+            const sortedCountries = Object.keys(countryMap).map(c => ({
+                country: c,
+                streams: countryMap[c],
+                percentage: totalStreams ? ((countryMap[c] / totalStreams) * 100).toFixed(1) + '%' : '0%'
+            })).sort((a, b) => b.streams - a.streams);
+
+            if (sortedCountries.length > 0) {
+                document.getElementById('kpi-top-country').innerText = sortedCountries[0].country;
+                document.getElementById('kpi-country-streams-share').innerText = `${sortedCountries[0].streams.toLocaleString()} oyentes (${sortedCountries[0].percentage})`;
+            } else {
+                document.getElementById('kpi-top-country').innerText = "-";
+                document.getElementById('kpi-country-streams-share').innerText = "0 oyentes";
+            }
+
+            document.getElementById('country-count-badge').innerText = `${sortedCountries.length} Países Identificados`;
+
+            // Popularity & Explicit
+            const avgWeightedPop = totalStreams ? (weightedPopSum / totalStreams).toFixed(1) : 0;
+            const explicitRatio = totalTracks ? ((explicitCount / totalTracks) * 100).toFixed(1) : 0;
+
+            document.getElementById('kpi-avg-popularity').innerText = `${avgWeightedPop} / 100`;
+            document.getElementById('kpi-explicit-ratio').innerText = `${explicitRatio}% contenido explícito`;
+
+            // Update Dashboard Charts
+            updateDashboardCharts(sortedGenres, sortedCountries);
+
+            // Render Genre Cards
+            renderGenreCards(sortedGenres);
+
+            // Update Individual Attribute Analysis
+            updateSingleAttributeAnalysis();
+        }
+
+        function renderGenreCards(sortedGenres) {
+            const colors = ["#1DB954", "#ec4899", "#8b5cf6", "#f59e0b", "#06b6d4", "#ef4444", "#3b82f6", "#10b981", "#6b7280"];
+            const icons = ["fa-guitar", "fa-fire", "fa-bolt", "fa-microphone", "fa-music", "fa-drum", "fa-compact-disc"];
+
+            const container = document.getElementById('genre-cards-container');
+            if (sortedGenres.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-zinc-500 py-6">Dataset vacío.</div>`;
+                return;
+            }
+
+            container.innerHTML = sortedGenres.map((g, idx) => {
+                const color = colors[idx % colors.length];
+                const icon = icons[idx % icons.length];
+                return `
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-all flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background-color: ${color}20; color: ${color}">
+                                <i class="fa-solid ${icon} text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-white">${g.genre}</h4>
+                                <p class="text-[11px] text-spotify-green font-mono font-bold">${g.streams.toLocaleString()} oyentes</p>
+                                <p class="text-[10px] text-zinc-500">${g.count} canción(es)</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-white px-2.5 py-1 bg-zinc-900 rounded-md border border-zinc-800 font-mono">${g.percentage}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function initDashboardCharts() {
+            // 1. Dashboard Genre Bar Chart
+            const ctxBar = document.getElementById('genreStreamsBarChart').getContext('2d');
+            genreBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Oyentes (stream_count)', data: [], backgroundColor: '#1DB954', borderRadius: 8 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 2. Dashboard Country Doughnut Chart
+            const ctxDoughnut = document.getElementById('countryDoughnutChart').getContext('2d');
+            countryDoughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 2, borderColor: '#181818' }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 9 }, boxWidth: 10 } } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function initSingleAttrCharts() {
+            // 1. Single Attribute Bar Chart
+            const ctxBar = document.getElementById('singleAttributeBarChart').getContext('2d');
+            singleAttrBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Oyentes Totales', data: [], backgroundColor: '#1DB954', borderRadius: 8 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 2. Single Attribute Doughnut Chart
+            const ctxDoughnut = document.getElementById('singleAttributeDoughnutChart').getContext('2d');
+            singleAttrDoughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 2, borderColor: '#181818' }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 9 }, boxWidth: 10 } } },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function updateDashboardCharts(genresList, countriesList) {
+            const colors = ["#1DB954", "#ec4899", "#8b5cf6", "#f59e0b", "#06b6d4", "#ef4444", "#3b82f6", "#10b981", "#6b7280"];
+
+            genreBarChart.data.labels = genresList.map(g => g.genre);
+            genreBarChart.data.datasets[0].data = genresList.map(g => g.streams);
+            genreBarChart.data.datasets[0].backgroundColor = genresList.map((_, i) => colors[i % colors.length]);
+            genreBarChart.update();
+
+            countryDoughnutChart.data.labels = countriesList.map(c => c.country);
+            countryDoughnutChart.data.datasets[0].data = countriesList.map(c => c.streams);
+            countryDoughnutChart.data.datasets[0].backgroundColor = countriesList.map((_, i) => colors[i % colors.length]);
+            countryDoughnutChart.update();
+        }
+
+        function selectIndividualAttribute(attrKey) {
+            currentSelectedAttr = attrKey;
+
+            // Highlight pill button
+            document.querySelectorAll('.attr-pill').forEach(btn => {
+                btn.classList.remove('bg-spotify-green', 'text-black', 'shadow-md', 'shadow-spotify-green/20');
+                btn.classList.add('bg-zinc-800', 'text-zinc-300');
+            });
+
+            const activeBtn = document.getElementById(`attr-btn-${attrKey}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-spotify-green', 'text-black', 'shadow-md', 'shadow-spotify-green/20');
+                activeBtn.classList.remove('bg-zinc-800', 'text-zinc-300');
+            }
+
+            updateSingleAttributeAnalysis();
+        }
+
+        function updateSingleAttributeAnalysis() {
+            const attrMap = {
+                'genre': { title: 'Género Musical (`genre`)', desc: 'Suma de oyentes por cada género' },
+                'country': { title: 'País (`country`)', desc: 'Distribución geográfica de oyentes' },
+                'release_date': { title: 'Año de Lanzamiento (`release_date`)', desc: 'Oyentes según el año de publicación' },
+                'popularity': { title: 'Rango de Popularidad (`popularity`)', desc: 'Oyentes agrupados por nivel de popularidad (0-100)' },
+                'danceability': { title: 'Bailabilidad (`danceability`)', desc: 'Oyentes agrupados por grado de danceability' },
+                'energy': { title: 'Energía (`energy`)', desc: 'Oyentes agrupados por intensidad y energía sonora' },
+                'explicit': { title: 'Contenido Explícito (`explicit`)', desc: 'Oyentes en canciones explicit (1) vs clean (0)' }
+            };
+
+            const info = attrMap[currentSelectedAttr] || { title: currentSelectedAttr, desc: 'Segmentación univariada' };
+
+            document.getElementById('single-attr-name').innerText = info.title;
+            document.getElementById('single-attr-desc').innerText = info.desc;
+            document.getElementById('single-attr-chart-title').innerText = `Oyentes por ${info.title}`;
+            document.getElementById('table-attr-label').innerText = info.title;
+
+            // Group data by selected attribute
+            const aggregated = {};
+            let totalStreams = 0;
+
+            songDataset.forEach(song => {
+                const streams = song.stream_count || 0;
+                totalStreams += streams;
+
+                let keyVal = "Sin Especificar";
+
+                if (currentSelectedAttr === 'genre') {
+                    keyVal = song.genre || 'Desconocido';
+                } else if (currentSelectedAttr === 'country') {
+                    keyVal = song.country || 'Global';
+                } else if (currentSelectedAttr === 'release_date') {
+                    // Extract year from DD-MM-YYYY or YYYY-MM-DD
+                    if (song.release_date && song.release_date.length >= 4) {
+                        const parts = song.release_date.split('-');
+                        keyVal = parts.length === 3 ? parts[2] : song.release_date.substring(0, 4);
+                    } else {
+                        keyVal = 'Año Desconocido';
+                    }
+                } else if (currentSelectedAttr === 'popularity') {
+                    const pop = song.popularity || 0;
+                    if (pop <= 25) keyVal = '0-25 (Muy Baja)';
+                    else if (pop <= 50) keyVal = '26-50 (Media-Baja)';
+                    else if (pop <= 75) keyVal = '51-75 (Alta)';
+                    else keyVal = '76-100 (Top Streamed)';
+                } else if (currentSelectedAttr === 'danceability') {
+                    const d = song.danceability || 0;
+                    if (d < 30) keyVal = 'Baja (<30%)';
+                    else if (d <= 60) keyVal = 'Moderada (30-60%)';
+                    else keyVal = 'Alta Danceability (>60%)';
+                } else if (currentSelectedAttr === 'energy') {
+                    const e = song.energy || 0;
+                    if (e < 30) keyVal = 'Relajada (<30%)';
+                    else if (e <= 60) keyVal = 'Energía Moderada (30-60%)';
+                    else keyVal = 'Alta Energía (>60%)';
+                } else if (currentSelectedAttr === 'explicit') {
+                    keyVal = song.explicit === 1 ? 'Explicit (1)' : 'Clean (0)';
+                }
+
+                if (!aggregated[keyVal]) {
+                    aggregated[keyVal] = { streams: 0, count: 0, popSum: 0 };
+                }
+                aggregated[keyVal].streams += streams;
+                aggregated[keyVal].count += 1;
+                aggregated[keyVal].popSum += song.popularity || 0;
+            });
+
+            // Convert to array and sort by stream_count descending
+            const segments = Object.keys(aggregated).map(key => {
+                const streams = aggregated[key].streams;
+                const count = aggregated[key].count;
+                const avgPop = count ? (aggregated[key].popSum / count).toFixed(1) : 0;
+                const percentage = totalStreams ? ((streams / totalStreams) * 100).toFixed(1) : 0;
+                return { category: key, streams, count, avgPop, percentage };
+            }).sort((a, b) => b.streams - a.streams);
+
+            // Update Insights KPIs
+            if (segments.length > 0) {
+                document.getElementById('single-attr-top-segment').innerText = segments[0].category;
+                document.getElementById('single-attr-top-share').innerText = `${segments[0].streams.toLocaleString()} oyentes (${segments[0].percentage}%)`;
+            } else {
+                document.getElementById('single-attr-top-segment').innerText = "-";
+                document.getElementById('single-attr-top-share').innerText = "0 oyentes";
+            }
+            document.getElementById('single-attr-count').innerText = segments.length;
+
+            // Update Charts
+            const colors = ["#1DB954", "#3b82f6", "#ec4899", "#f59e0b", "#8b5cf6", "#06b6d4", "#ef4444", "#10b981", "#6b7280"];
+
+            singleAttrBarChart.data.labels = segments.map(s => s.category);
+            singleAttrBarChart.data.datasets[0].data = segments.map(s => s.streams);
+            singleAttrBarChart.data.datasets[0].backgroundColor = segments.map((_, i) => colors[i % colors.length]);
+            singleAttrBarChart.update();
+
+            singleAttrDoughnutChart.data.labels = segments.map(s => s.category);
+            singleAttrDoughnutChart.data.datasets[0].data = segments.map(s => s.streams);
+            singleAttrDoughnutChart.data.datasets[0].backgroundColor = segments.map((_, i) => colors[i % colors.length]);
+            singleAttrDoughnutChart.update();
+
+            // Render Table
+            renderSingleAttrTable(segments);
+        }
+
+        function renderSingleAttrTable(segments) {
+            const tbody = document.getElementById('single-attribute-table-body');
+            if (segments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-zinc-500">Sin datos de segmentación.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = segments.map((seg, idx) => `
+                <tr class="hover:bg-zinc-900/80 transition-colors">
+                    <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
+                        <span class="text-xs text-zinc-500 font-mono w-5">${idx + 1}.</span>
+                        ${seg.category}
+                    </td>
+                    <td class="py-3 px-4 text-right font-black text-spotify-green font-mono">${seg.streams.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="px-2 py-0.5 rounded bg-spotify-green/10 text-spotify-green font-bold text-xs">${seg.percentage}%</span>
+                    </td>
+                    <td class="py-3 px-4 text-center text-zinc-300">${seg.count} pista(s)</td>
+                    <td class="py-3 px-4 text-center text-amber-400 font-bold">${seg.avgPop}</td>
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(tabId) {
+            activeTab = tabId;
+
+            // Hide tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            
+            // Unhighlight nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-spotify-green/10', 'text-spotify-green');
+                btn.classList.add('text-zinc-400');
+            });
+
+            // Show active tab
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            // Highlight active nav
+            const targetNav = document.getElementById(`nav-${tabId}`);
+            if (targetNav) {
+                targetNav.classList.add('bg-spotify-green/10', 'text-spotify-green');
+                targetNav.classList.remove('text-zinc-400');
+            }
+
+            // Headers
+            const titleMap = {
+                'dashboard': 'Análisis Global de Oyentes (`stream_count`)',
+                'segmentation': 'Segmentación por Atributo Individual'
+            };
+            const subtitleMap = {
+                'dashboard': 'Procesamiento y segmentación cuantitativa de reproducciones basadas en el dataset de Spotify.',
+                'segmentation': 'Analiza qué cantidad de oyentes tiene cada atributo por separado (género, fecha, país, energía, danceability, etc.).'
+            };
+
+            document.getElementById('header-title').innerText = titleMap[tabId];
+            document.getElementById('header-subtitle').innerText = subtitleMap[tabId];
+        }
+
+        function exportDatasetSummary() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(songDataset, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "spotify_stream_segmentation_summary.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Resumen de oyentes exportado en formato JSON");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-[-150%]');
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-150%]');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
