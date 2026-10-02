@@ -97,7 +97,7 @@ def init_db(inferencia_fn=None):
                 "track_name": "Hyperdrive Overload",
                 "artist_name": "CyberPulse",
                 "genre": "EDM",
-                "country": "United States",
+                "country": "Estados Unidos",
                 "tempo": 136.0,
                 "danceability": 0.69,
                 "energy": 0.94,
