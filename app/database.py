@@ -1,8 +1,3 @@
-"""
-SoundData Analytics - Capa de Base de Datos SQLite (CRUD de Canciones y Demos)
-Permite la persistencia de canciones evaluadas por los modelos de Machine Learning.
-"""
-
 import os
 import sqlite3
 import json
@@ -13,19 +8,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'sounddata.db')
 
 def get_connection() -> sqlite3.Connection:
-    """Obtiene una conexión a la base de datos SQLite con soporte para diccionarios (sqlite3.Row)."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db(inferencia_fn=None):
-    """
-    Inicializa la tabla 'canciones' en SQLite si no existe.
-    Si la tabla está vacía, inserta canciones semilla para demostración inmediata.
-    """
     conn = get_connection()
     cursor = conn.cursor()
-    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS canciones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,13 +38,11 @@ def init_db(inferencia_fn=None):
     );
     """)
     conn.commit()
-    
-    # Verificar si ya existen registros
+
     cursor.execute("SELECT COUNT(*) FROM canciones;")
     total = cursor.fetchone()[0]
-    
+
     if total == 0 and inferencia_fn:
-        # Semillas de prueba realistas para demostración
         semillas = [
             {
                 "track_name": "Noches de Verano",
@@ -72,7 +59,7 @@ def init_db(inferencia_fn=None):
             {
                 "track_name": "Perreo 56",
                 "artist_name": "El Jordan & FlowCL",
-                "genre": "Reggaeton",
+                "genre": "Reggaetón",
                 "country": "Chile",
                 "tempo": 98.0,
                 "danceability": 0.88,
@@ -106,7 +93,7 @@ def init_db(inferencia_fn=None):
                 "explicit": 0
             }
         ]
-        
+
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for s in semillas:
             ml_res = inferencia_fn(
@@ -134,8 +121,7 @@ def init_db(inferencia_fn=None):
                 now, now
             ))
         conn.commit()
-        print(f"Base de datos SQLite inicializada con {len(semillas)} canciones de prueba.")
-        
+
     conn.close()
 
 def listar_canciones(
@@ -143,52 +129,49 @@ def listar_canciones(
     filtro_hit: Optional[int] = None,
     filtro_genero: Optional[str] = None
 ) -> List[Dict[str, Any]]:
-    """Consulta todas las canciones registradas con filtros opcionales."""
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     query = "SELECT * FROM canciones WHERE 1=1"
     params = []
-    
+
     if filtro_q:
         query += " AND (track_name LIKE ? OR artist_name LIKE ?)"
         term = f"%{filtro_q.strip()}%"
         params.extend([term, term])
-        
+
     if filtro_hit is not None:
         query += " AND es_hit = ?"
         params.append(filtro_hit)
-        
+
     if filtro_genero and filtro_genero.strip() != "":
         query += " AND genre = ?"
         params.append(filtro_genero.strip())
-        
+
     query += " ORDER BY id DESC;"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    
+
     resultado = []
     for r in rows:
         d = dict(r)
-        # Parsear recomendaciones de JSON
         try:
             d["recomendaciones"] = json.loads(d["recomendaciones"])
         except Exception:
             d["recomendaciones"] = []
         d["es_hit"] = bool(d["es_hit"] == 1)
         resultado.append(d)
-        
+
     conn.close()
     return resultado
 
 def obtener_cancion(cancion_id: int) -> Optional[Dict[str, Any]]:
-    """Obtiene una canción específica por su ID primario."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM canciones WHERE id = ?;", (cancion_id,))
     row = cursor.fetchone()
     conn.close()
-    
+
     if not row:
         return None
     d = dict(row)
@@ -200,11 +183,10 @@ def obtener_cancion(cancion_id: int) -> Optional[Dict[str, Any]]:
     return d
 
 def crear_cancion(datos: Dict[str, Any], ml_res: Dict[str, Any]) -> Dict[str, Any]:
-    """Inserta una nueva canción y sus predicciones de ML en SQLite."""
     conn = get_connection()
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     cursor.execute("""
     INSERT INTO canciones (
         track_name, artist_name, genre, country,
@@ -222,15 +204,14 @@ def crear_cancion(datos: Dict[str, Any], ml_res: Dict[str, Any]) -> Dict[str, An
     conn.commit()
     new_id = cursor.lastrowid
     conn.close()
-    
+
     return obtener_cancion(new_id)
 
 def actualizar_cancion(cancion_id: int, datos: Dict[str, Any], ml_res: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Actualiza una canción existente y recalcula sus métricas de ML."""
     conn = get_connection()
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     cursor.execute("""
     UPDATE canciones SET
         track_name = ?, artist_name = ?, genre = ?, country = ?,
@@ -247,11 +228,10 @@ def actualizar_cancion(cancion_id: int, datos: Dict[str, Any], ml_res: Dict[str,
     ))
     conn.commit()
     conn.close()
-    
+
     return obtener_cancion(cancion_id)
 
 def eliminar_cancion(cancion_id: int) -> bool:
-    """Elimina una canción por su ID de la base de datos."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM canciones WHERE id = ?;", (cancion_id,))
