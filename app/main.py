@@ -4,6 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from typing import Optional, List
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -143,10 +144,12 @@ def ejecutar_inferencia(
         "recomendaciones": recomendaciones
     }
 
-# Evento de inicialización de la Base de Datos SQLite
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan_handler(app_instance: FastAPI):
     init_db(inferencia_fn=ejecutar_inferencia)
+    yield
+
+app.router.lifespan_context = lifespan_handler
 
 # Esquemas Pydantic
 class PredictionInput(BaseModel):
