@@ -63,3 +63,37 @@ flowchart TD
     P4 --> P5
     P5 <--> P6
 ```
+
+---
+
+## 3. Diagrama de Persistencia y Flujo CRUD (SQLite + Machine Learning)
+
+El módulo de **Portafolio y Gestión de Canciones (A&R Tracker)** conecta las operaciones de base de datos relacional con la inferencia en tiempo real:
+
+```mermaid
+flowchart LR
+    subgraph UI["🖥️ Frontend (index.html)"]
+        Form["Formulario / Modal / Simulador"]
+        Tabla["Tabla de Canciones con Filtros"]
+    end
+
+    subgraph API["⚙️ Backend FastAPI (main.py)"]
+        Endpoints["Endpoints CRUD:<br>• GET /api/canciones<br>• POST /api/canciones<br>• PUT /api/canciones/{id}<br>• DELETE /api/canciones/{id}"]
+    end
+
+    subgraph ML["🧠 Modelos Serializados"]
+        Infer["Inferencia:<br>1. Árbol (Hit/Nicho)<br>2. K-Means (Cluster)<br>3. Apriori (Recomendaciones)"]
+    end
+
+    subgraph DB["🗄️ Base de Datos SQLite (sounddata.db)"]
+        TablaDB[("Tabla 'canciones'<br>• id, track_name, artist_name<br>• tempo, energy, danceability<br>• es_hit, probabilidad_hit<br>• cluster_id, cluster_nombre<br>• recomendaciones (JSON)")]
+    end
+
+    Form -->|POST / PUT datos acústicos| Endpoints
+    Endpoints -->|Dispara inferencia| Infer
+    Infer -->|Retorna diagnóstico| Endpoints
+    Endpoints -->|Persiste registro| TablaDB
+    TablaDB -->|Lee registros| Endpoints
+    Endpoints -->|JSON enriquecido| Tabla
+```
+

@@ -3,157 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundPulse Analytics - Segmentación Global por Dataset Spotify</title>
+    <title>SoundData Analytics - Minería de Datos & Machine Learning</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com">
-        // Lógica de consumo de API Machine Learning (POST /api/predecir)
-        async function ejecutarPrediccion() {
-            const btn = document.getElementById('btn-predecir');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
-            
-            const payload = {
-                tempo: parseFloat(document.getElementById('input-tempo').value),
-                danceability: parseFloat(document.getElementById('input-dance').value),
-                energy: parseFloat(document.getElementById('input-energy').value),
-                loudness: parseFloat(document.getElementById('input-loud').value),
-                instrumentalness: parseFloat(document.getElementById('input-inst').value),
-                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
-                genre: document.getElementById('input-genre').value,
-                country: document.getElementById('input-country').value
-            };
-
-            try {
-                const response = await fetch('/api/predecir', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (data.exito) {
-                    // Actualizar Árbol de Decisión
-                    const hitBadge = document.getElementById('res-hit-badge');
-                    const hitTitle = document.getElementById('res-hit-title');
-                    const hitProb = document.getElementById('res-hit-prob');
-                    
-                    if (data.es_hit) {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
-                        hitBadge.innerText = 'POTENCIAL HIT';
-                        hitTitle.innerText = 'Alta Repercusión Comercial';
-                    } else {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
-                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
-                    }
-                    hitProb.innerText = `${data.probabilidad_hit}%`;
-                    
-                    // Actualizar K-Means
-                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
-                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
-                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
-                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
-                    
-                    // Actualizar Apriori
-                    const recomList = document.getElementById('res-recom-list');
-                    recomList.innerHTML = '';
-                    data.recomendaciones.forEach(rec => {
-                        const li = document.createElement('li');
-                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
-                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
-                        recomList.appendChild(li);
-                    });
-                    
-                    showToast('¡Predicción y segmentación completadas!');
-                } else {
-                    showToast('Error en la predicción');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Error de conexión con la API');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
-            }
-        }
-
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js">
-        // Lógica de consumo de API Machine Learning (POST /api/predecir)
-        async function ejecutarPrediccion() {
-            const btn = document.getElementById('btn-predecir');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
-            
-            const payload = {
-                tempo: parseFloat(document.getElementById('input-tempo').value),
-                danceability: parseFloat(document.getElementById('input-dance').value),
-                energy: parseFloat(document.getElementById('input-energy').value),
-                loudness: parseFloat(document.getElementById('input-loud').value),
-                instrumentalness: parseFloat(document.getElementById('input-inst').value),
-                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
-                genre: document.getElementById('input-genre').value,
-                country: document.getElementById('input-country').value
-            };
-
-            try {
-                const response = await fetch('/api/predecir', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (data.exito) {
-                    // Actualizar Árbol de Decisión
-                    const hitBadge = document.getElementById('res-hit-badge');
-                    const hitTitle = document.getElementById('res-hit-title');
-                    const hitProb = document.getElementById('res-hit-prob');
-                    
-                    if (data.es_hit) {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
-                        hitBadge.innerText = 'POTENCIAL HIT';
-                        hitTitle.innerText = 'Alta Repercusión Comercial';
-                    } else {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
-                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
-                    }
-                    hitProb.innerText = `${data.probabilidad_hit}%`;
-                    
-                    // Actualizar K-Means
-                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
-                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
-                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
-                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
-                    
-                    // Actualizar Apriori
-                    const recomList = document.getElementById('res-recom-list');
-                    recomList.innerHTML = '';
-                    data.recomendaciones.forEach(rec => {
-                        const li = document.createElement('li');
-                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
-                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
-                        recomList.appendChild(li);
-                    });
-                    
-                    showToast('¡Predicción y segmentación completadas!');
-                } else {
-                    showToast('Error en la predicción');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Error de conexión con la API');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
-            }
-        }
-
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Font Inter -->
@@ -180,79 +34,6 @@
                 }
             }
         }
-    
-        // Lógica de consumo de API Machine Learning (POST /api/predecir)
-        async function ejecutarPrediccion() {
-            const btn = document.getElementById('btn-predecir');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
-            
-            const payload = {
-                tempo: parseFloat(document.getElementById('input-tempo').value),
-                danceability: parseFloat(document.getElementById('input-dance').value),
-                energy: parseFloat(document.getElementById('input-energy').value),
-                loudness: parseFloat(document.getElementById('input-loud').value),
-                instrumentalness: parseFloat(document.getElementById('input-inst').value),
-                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
-                genre: document.getElementById('input-genre').value,
-                country: document.getElementById('input-country').value
-            };
-
-            try {
-                const response = await fetch('/api/predecir', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (data.exito) {
-                    // Actualizar Árbol de Decisión
-                    const hitBadge = document.getElementById('res-hit-badge');
-                    const hitTitle = document.getElementById('res-hit-title');
-                    const hitProb = document.getElementById('res-hit-prob');
-                    
-                    if (data.es_hit) {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
-                        hitBadge.innerText = 'POTENCIAL HIT';
-                        hitTitle.innerText = 'Alta Repercusión Comercial';
-                    } else {
-                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
-                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
-                    }
-                    hitProb.innerText = `${data.probabilidad_hit}%`;
-                    
-                    // Actualizar K-Means
-                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
-                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
-                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
-                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
-                    
-                    // Actualizar Apriori
-                    const recomList = document.getElementById('res-recom-list');
-                    recomList.innerHTML = '';
-                    data.recomendaciones.forEach(rec => {
-                        const li = document.createElement('li');
-                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
-                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
-                        recomList.appendChild(li);
-                    });
-                    
-                    showToast('¡Predicción y segmentación completadas!');
-                } else {
-                    showToast('Error en la predicción');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Error de conexión con la API');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
-            }
-        }
-
     </script>
     <style>
         ::-webkit-scrollbar {
@@ -270,7 +51,7 @@
             background: #1DB954;
         }
         .glass-panel {
-            background: rgba(24, 24, 24, 0.8);
+            background: rgba(24, 24, 24, 0.85);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -281,7 +62,7 @@
     <!-- Notification Toast -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-out flex items-center gap-3 bg-spotify-green text-black px-5 py-3 rounded-full font-bold shadow-2xl">
         <i class="fa-solid fa-circle-check text-xl"></i>
-        <span id="toast-message">Atributo actualizado con éxito</span>
+        <span id="toast-message">Operación realizada con éxito</span>
     </div>
 
     <!-- Sidebar Navigation -->
@@ -294,7 +75,7 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-xl tracking-tight text-white leading-none">Sound<span class="text-spotify-green">Data</span></h1>
-                    <span class="text-[10px] text-zinc-400 font-medium tracking-wider uppercase">Dataset Analytics & Streams</span>
+                    <span class="text-[10px] text-zinc-400 font-medium tracking-wider uppercase">Minería de Datos & ML</span>
                 </div>
             </div>
 
@@ -307,7 +88,7 @@
                     </span>
                     <div class="text-xs">
                         <p class="font-semibold text-white">Dataset Conectado</p>
-                        <p id="sidebar-streams-badge" class="text-[10px] text-spotify-green font-mono">0 Oyentes Totales</p>
+                        <p id="sidebar-streams-badge" class="text-[10px] text-spotify-green font-mono">85,000 Canciones</p>
                     </div>
                 </div>
                 <button onclick="reloadDefaultDataset()" title="Recargar Dataset Inicial" class="text-zinc-400 hover:text-spotify-green transition-colors p-1">
@@ -329,6 +110,10 @@
                     <i class="fa-solid fa-wand-magic-sparkles text-lg w-5"></i>
                     <span>Simulador ML (Predicción)</span>
                 </button>
+                <button onclick="switchTab('portfolio')" id="nav-portfolio" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all">
+                    <i class="fa-solid fa-folder-open text-lg w-5"></i>
+                    <span>Portafolio & CRUD (SQLite)</span>
+                </button>
             </nav>
         </div>
 
@@ -336,15 +121,15 @@
         <div class="pt-4 border-t border-zinc-800 mt-6 text-xs text-zinc-400 space-y-2">
             <div class="flex justify-between">
                 <span>Total Registros:</span>
-                <span id="sidebar-total-records" class="font-bold text-white">0</span>
+                <span id="sidebar-total-records" class="font-bold text-white">85,000</span>
             </div>
             <div class="flex justify-between">
-                <span>Géneros Analizados:</span>
-                <span id="sidebar-total-genres" class="font-bold text-spotify-green">0</span>
+                <span>Modelos Activos:</span>
+                <span class="font-bold text-spotify-green">Árbol + K-Means + Apriori</span>
             </div>
             <div class="flex justify-between">
-                <span>Países en Dataset:</span>
-                <span id="sidebar-total-countries" class="font-bold text-white">0</span>
+                <span>Persistencia:</span>
+                <span class="font-bold text-white">SQLite (`sounddata.db`)</span>
             </div>
         </div>
     </aside>
@@ -438,8 +223,6 @@
 
                 <!-- Genre Streams Bar Chart and Country Share Chart -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Main Bar Chart: Stream Count per Genre -->
                     <div class="lg:col-span-2 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-4">
                             <div>
@@ -456,7 +239,6 @@
                         </div>
                     </div>
 
-                    <!-- Doughnut Chart: Streams per Country -->
                     <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
                         <div class="mb-2">
                             <h3 class="font-extrabold text-lg text-white">Distribución de Oyentes por País</h3>
@@ -485,8 +267,83 @@
 
             </div>
 
+            <!-- TAB 2: SEGMENTACIÓN POR ATRIBUTO INDIVIDUAL -->
+            <div id="tab-segmentation" class="tab-content hidden space-y-6">
 
-            <!-- TAB 3: SIMULADOR PREDICTIVO MACHINE LEARNING (Fases 4A, 4B, 4C) -->
+                <!-- Attribute Selector Bar -->
+                <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <div>
+                            <span class="px-3 py-1 bg-spotify-green/20 text-spotify-green text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Análisis Univariado de Oyentes</span>
+                            <h3 class="text-2xl font-black text-white">Segmentación por Atributo Individual</h3>
+                            <p class="text-xs text-zinc-300 mt-1">Selecciona un atributo del dataset para calcular exactamente cuántos oyentes (`stream_count`) abarca cada categoría o rango.</p>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Pills Navigation -->
+                    <div class="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/80">
+                        <button onclick="selectIndividualAttribute('genre')" id="attr-btn-genre" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-spotify-green text-black shadow-md shadow-spotify-green/20">
+                            <i class="fa-solid fa-guitar mr-1.5"></i> Género (`genre`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('country')" id="attr-btn-country" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-globe mr-1.5"></i> País (`country`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('release_date')" id="attr-btn-release_date" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-calendar mr-1.5"></i> Año (`release_date`)
+                        </button>
+                        <button onclick="selectIndividualAttribute('popularity')" id="attr-btn-popularity" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-fire mr-1.5"></i> Popularidad
+                        </button>
+                        <button onclick="selectIndividualAttribute('danceability')" id="attr-btn-danceability" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-drum mr-1.5"></i> Danceability
+                        </button>
+                        <button onclick="selectIndividualAttribute('energy')" id="attr-btn-energy" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-bolt mr-1.5"></i> Energy
+                        </button>
+                        <button onclick="selectIndividualAttribute('explicit')" id="attr-btn-explicit" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
+                            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Explícito
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Attribute Chart and Table Analysis -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-7 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 id="attribute-chart-title" class="font-black text-lg text-white">Distribución de Oyentes por Género</h4>
+                                <span id="attribute-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-300">Total Categorías: 0</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 mb-4">Volumen comparativo de oyentes generado por cada segmento del atributo seleccionado.</p>
+                        </div>
+                        <div class="relative h-72 sm:h-80 w-full">
+                            <canvas id="individualAttributeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col">
+                        <div class="mb-4">
+                            <h4 class="font-black text-lg text-white">Tabla de Participación de Oyentes</h4>
+                            <p class="text-xs text-zinc-400">Porcentaje de penetración sobre el total del dataset</p>
+                        </div>
+                        <div class="overflow-y-auto max-h-80 flex-1 pr-1">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="bg-zinc-900/90 text-zinc-400 font-bold uppercase text-[10px] sticky top-0">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Segmento</th>
+                                        <th class="py-2.5 px-3 text-right">Oyentes</th>
+                                        <th class="py-2.5 px-3 text-center">% Peso</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attribute-table-body" class="divide-y divide-zinc-800">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SIMULADOR PREDICTIVO MACHINE LEARNING -->
             <div id="tab-prediction" class="tab-content hidden space-y-6">
 
                 <!-- Header Banner -->
@@ -502,6 +359,18 @@
                         <h4 class="font-extrabold text-white text-base flex items-center gap-2">
                             <i class="fa-solid fa-sliders text-spotify-green"></i> Atributos Acústicos
                         </h4>
+
+                        <!-- Track and Artist Names for Portfolio -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-zinc-400 font-semibold mb-1">Título del Track:</label>
+                                <input type="text" id="sim-track-name" value="Nuevo Demo 2026" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-zinc-400 font-semibold mb-1">Artista / Productor:</label>
+                                <input type="text" id="sim-artist-name" value="Mi Artista" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                            </div>
+                        </div>
 
                         <!-- Tempo Slider -->
                         <div>
@@ -591,11 +460,17 @@
                             <label for="input-explicit" class="text-xs text-zinc-300 cursor-pointer">Letra con contenido explícito (Explicit)</label>
                         </div>
 
-                        <!-- Submit Button -->
-                        <button onclick="ejecutarPrediccion()" id="btn-predecir" class="w-full mt-4 bg-spotify-green hover:bg-spotify-hover text-black font-extrabold py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg shadow-spotify-green/20">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            <span>Calcular Predicción con ML</span>
-                        </button>
+                        <!-- Action Buttons -->
+                        <div class="pt-2 space-y-2">
+                            <button onclick="ejecutarPrediccion()" id="btn-predecir" class="w-full bg-spotify-green hover:bg-spotify-hover text-black font-extrabold py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg shadow-spotify-green/20">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Calcular Predicción con ML</span>
+                            </button>
+                            <button onclick="guardarDesdeSimulador()" id="btn-guardar-sim" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-full flex items-center justify-center gap-2 transition-all border border-zinc-700 text-xs">
+                                <i class="fa-solid fa-floppy-disk text-spotify-green"></i>
+                                <span>💾 Guardar Track en Portafolio SQLite</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Results Column -->
@@ -670,110 +545,95 @@
 
             </div>
 
-            <!-- TAB 2: SEGMENTACIÓN POR ATRIBUTO INDIVIDUAL -->
-            <div id="tab-segmentation" class="tab-content hidden space-y-6">
+            <!-- TAB 4: PORTAFOLIO DE CANCIONES Y CRUD SQLITE -->
+            <div id="tab-portfolio" class="tab-content hidden space-y-6">
 
-                <!-- Attribute Selector Bar -->
-                <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                        <div>
-                            <span class="px-3 py-1 bg-spotify-green/20 text-spotify-green text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Análisis Univariado de Oyentes</span>
-                            <h3 class="text-2xl font-black text-white">Segmentación por Atributo Individual</h3>
-                            <p class="text-xs text-zinc-300 mt-1">Selecciona un atributo del dataset para calcular exactamente cuántos oyentes (`stream_count`) abarca cada categoría o rango.</p>
-                        </div>
+                <!-- Header Banner -->
+                <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-purple-950/40 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Persistencia Relacional SQLite</span>
+                        <h3 class="text-2xl font-black text-white">Portafolio & Gestión de Demos Musicales</h3>
+                        <p class="text-xs text-zinc-300 mt-1">Registra, consulta, actualiza y descarta canciones evaluadas por los modelos de Machine Learning.</p>
                     </div>
+                    <button onclick="abrirModalCrearCancion()" class="bg-spotify-green hover:bg-spotify-hover text-black font-extrabold px-5 py-2.5 rounded-full flex items-center gap-2 text-xs shadow-lg shadow-spotify-green/20 transition-all">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nueva Canción</span>
+                    </button>
+                </div>
 
-                    <!-- Attribute Pills Navigation -->
-                    <div class="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/80">
-                        <button onclick="selectIndividualAttribute('genre')" id="attr-btn-genre" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-spotify-green text-black shadow-md shadow-spotify-green/20">
-                            <i class="fa-solid fa-guitar mr-1.5"></i> Género (`genre`)
-                        </button>
-                        <button onclick="selectIndividualAttribute('country')" id="attr-btn-country" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-globe mr-1.5"></i> País (`country`)
-                        </button>
-                        <button onclick="selectIndividualAttribute('release_date')" id="attr-btn-release_date" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-calendar mr-1.5"></i> Año de Lanzamiento (`release_date`)
-                        </button>
-                        <button onclick="selectIndividualAttribute('popularity')" id="attr-btn-popularity" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-fire mr-1.5"></i> Popularidad (`popularity`)
-                        </button>
-                        <button onclick="selectIndividualAttribute('danceability')" id="attr-btn-danceability" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-drum mr-1.5"></i> Danceability
-                        </button>
-                        <button onclick="selectIndividualAttribute('energy')" id="attr-btn-energy" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-bolt mr-1.5"></i> Energy
-                        </button>
-                        <button onclick="selectIndividualAttribute('explicit')" id="attr-btn-explicit" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700">
-                            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Explícito (`explicit`)
+                <!-- CRUD Summary Metrics -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800">
+                        <p class="text-[11px] text-zinc-400 font-semibold uppercase">Total Canciones</p>
+                        <h4 id="crud-stat-total" class="text-2xl font-black text-white mt-1">0</h4>
+                    </div>
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800">
+                        <p class="text-[11px] text-spotify-green font-semibold uppercase">Potenciales Hits</p>
+                        <h4 id="crud-stat-hits" class="text-2xl font-black text-spotify-green mt-1">0</h4>
+                    </div>
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800">
+                        <p class="text-[11px] text-amber-400 font-semibold uppercase">Temas de Nicho</p>
+                        <h4 id="crud-stat-nicho" class="text-2xl font-black text-amber-400 mt-1">0</h4>
+                    </div>
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800">
+                        <p class="text-[11px] text-purple-400 font-semibold uppercase">Base de Datos</p>
+                        <h4 class="text-sm font-bold text-white mt-2 font-mono">sounddata.db (SQLite)</h4>
+                    </div>
+                </div>
+
+                <!-- Filter and Search Controls -->
+                <div class="bg-spotify-card p-4 rounded-2xl border border-zinc-800/80 flex flex-col md:flex-row gap-3 justify-between items-center">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-zinc-500 text-xs"></i>
+                        <input type="text" id="crud-search-input" oninput="filtrarCancionesCRUD()" placeholder="Buscar por canción o artista..." class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white pl-9 pr-3 py-2 rounded-xl focus:border-spotify-green focus:outline-none">
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <select id="crud-filter-genre" onchange="cargarCancionesCRUD()" class="bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 px-3 py-2 rounded-xl focus:border-spotify-green focus:outline-none">
+                            <option value="">Todos los Géneros</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Reggaeton">Reggaeton</option>
+                            <option value="EDM">EDM</option>
+                            <option value="Hip-Hop">Hip-Hop</option>
+                            <option value="Folk">Folk</option>
+                            <option value="R&B">R&B</option>
+                            <option value="Indie">Indie</option>
+                        </select>
+
+                        <select id="crud-filter-hit" onchange="cargarCancionesCRUD()" class="bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 px-3 py-2 rounded-xl focus:border-spotify-green focus:outline-none">
+                            <option value="">Todos los Diagnósticos</option>
+                            <option value="1">Solo Hits</option>
+                            <option value="0">Solo Nicho</option>
+                        </select>
+
+                        <button onclick="cargarCancionesCRUD()" class="p-2 text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-all" title="Refrescar">
+                            <i class="fa-solid fa-rotate-right"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Selected Attribute Insights Summary KPI -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
-                        <p class="text-xs font-semibold text-zinc-400">Atributo en Análisis</p>
-                        <h4 id="single-attr-name" class="text-xl font-black text-spotify-green mt-1">Género Musical</h4>
-                        <p id="single-attr-desc" class="text-[11px] text-zinc-400 mt-1">Desglose por categoría `genre`</p>
-                    </div>
-
-                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
-                        <p class="text-xs font-semibold text-zinc-400">Segmento Dominante</p>
-                        <h4 id="single-attr-top-segment" class="text-xl font-black text-white mt-1">-</h4>
-                        <p id="single-attr-top-share" class="text-[11px] text-spotify-green font-mono mt-1">0 oyentes (0%)</p>
-                    </div>
-
-                    <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800">
-                        <p class="text-xs font-semibold text-zinc-400">Categorías / Bins Identificados</p>
-                        <h4 id="single-attr-count" class="text-xl font-black text-white mt-1">0</h4>
-                        <p class="text-[11px] text-zinc-400 mt-1">Grupos distintos analizados</p>
-                    </div>
-                </div>
-
-                <!-- Attribute Segment Visualization Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Main Bar Chart for Selected Attribute -->
-                    <div class="lg:col-span-2 bg-spotify-card p-6 rounded-2xl border border-zinc-800 flex flex-col justify-between">
-                        <div class="mb-4">
-                            <h3 id="single-attr-chart-title" class="font-extrabold text-lg text-white">Oyentes (`stream_count`) por Género Musical</h3>
-                            <p class="text-xs text-zinc-400">Comparativa cuantitativa de reproducciones acumuladas</p>
-                        </div>
-                        <div class="relative h-72 w-full">
-                            <canvas id="singleAttributeBarChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Doughnut Distribution for Selected Attribute -->
-                    <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800 flex flex-col justify-between">
-                        <div class="mb-2">
-                            <h3 class="font-extrabold text-lg text-white">Proporción de Oyentes</h3>
-                            <p class="text-xs text-zinc-400">% de presencia en el dataset</p>
-                        </div>
-                        <div class="relative h-60 w-full my-auto flex items-center justify-center">
-                            <canvas id="singleAttributeDoughnutChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ranking & Detailed Segment Breakdown Table -->
-                <div class="bg-spotify-card rounded-2xl border border-zinc-800 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
-                        <h3 class="font-extrabold text-base text-white">Tabla de Segmentación por <span id="table-attr-label" class="text-spotify-green">Género Musical</span></h3>
-                        <span class="text-xs text-zinc-400">Suma total de `stream_count` por categoría</span>
-                    </div>
+                <!-- CRUD Data Table -->
+                <div class="bg-spotify-card rounded-2xl border border-zinc-800/80 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
-                            <thead class="bg-zinc-900/90 text-zinc-400 uppercase font-bold border-b border-zinc-800">
+                            <thead class="bg-zinc-900/90 text-zinc-400 uppercase text-[10px] font-bold border-b border-zinc-800">
                                 <tr>
-                                    <th class="py-3 px-4">Categoría / Valor</th>
-                                    <th class="py-3 px-4 text-right">Oyentes (`stream_count`)</th>
-                                    <th class="py-3 px-4 text-center">% del Total Global</th>
-                                    <th class="py-3 px-4 text-center">N° Canciones</th>
-                                    <th class="py-3 px-4 text-center">Popularidad Promedio</th>
+                                    <th class="py-3 px-4"># ID</th>
+                                    <th class="py-3 px-4">Track / Artista</th>
+                                    <th class="py-3 px-4">Género & País</th>
+                                    <th class="py-3 px-4">Acústica</th>
+                                    <th class="py-3 px-4 text-center">Diagnóstico Hit</th>
+                                    <th class="py-3 px-4">Cluster Asignado</th>
+                                    <th class="py-3 px-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="single-attribute-table-body" class="divide-y divide-zinc-800/60 font-mono">
-                                <!-- Populated dynamically by JS -->
+                            <tbody id="crud-table-body" class="divide-y divide-zinc-800/60">
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-zinc-500">
+                                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Cargando canciones de la base de datos...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -782,447 +642,407 @@
             </div>
 
         </div>
+
     </main>
 
+    <!-- MODAL: CREAR / EDITAR CANCIÓN EN CRUD -->
+    <div id="modal-crud" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-spotify-card border border-zinc-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 id="modal-title" class="text-lg font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-music text-spotify-green"></i> <span>Registrar Nueva Canción</span>
+                </h3>
+                <button onclick="cerrarModalCRUD()" class="text-zinc-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="form-crud" onsubmit="guardarCancionModal(event)" class="space-y-4">
+                <input type="hidden" id="modal-cancion-id" value="">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-1">Título de la Canción:</label>
+                        <input type="text" id="modal-track-name" required placeholder="Ej: Luna de Media Noche" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-1">Artista o Productor:</label>
+                        <input type="text" id="modal-artist-name" required placeholder="Ej: Vicente Romero" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-1">Género:</label>
+                        <select id="modal-genre" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Reggaeton">Reggaeton</option>
+                            <option value="EDM">EDM</option>
+                            <option value="Hip-Hop">Hip-Hop</option>
+                            <option value="Metal">Metal</option>
+                            <option value="R&B">R&B</option>
+                            <option value="Indie">Indie</option>
+                            <option value="Folk">Folk</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Classical">Classical</option>
+                            <option value="Country">Country</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-1">Mercado Objetivo:</label>
+                        <select id="modal-country" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                            <option value="Chile">Chile</option>
+                            <option value="Mexico">México</option>
+                            <option value="United States">Estados Unidos</option>
+                            <option value="Brazil">Brasil</option>
+                            <option value="United Kingdom">Reino Unido</option>
+                            <option value="Germany">Alemania</option>
+                            <option value="Japan">Japón</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sliders Acústicos -->
+                <div class="space-y-3 pt-2 border-t border-zinc-800">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="text-zinc-300 font-semibold">Tempo (BPM):</label>
+                            <span id="modal-val-tempo" class="text-spotify-green font-bold">125 BPM</span>
+                        </div>
+                        <input type="range" id="modal-tempo" min="60" max="200" value="125" step="1" oninput="document.getElementById('modal-val-tempo').innerText = this.value + ' BPM'" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Bailabilidad:</label>
+                                <span id="modal-val-dance" class="text-spotify-green font-bold">0.70</span>
+                            </div>
+                            <input type="range" id="modal-dance" min="0" max="1" value="0.70" step="0.01" oninput="document.getElementById('modal-val-dance').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Energía:</label>
+                                <span id="modal-val-energy" class="text-spotify-green font-bold">0.75</span>
+                            </div>
+                            <input type="range" id="modal-energy" min="0" max="1" value="0.75" step="0.01" oninput="document.getElementById('modal-val-energy').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Sonoridad (dB):</label>
+                                <span id="modal-val-loud" class="text-spotify-green font-bold">-8 dB</span>
+                            </div>
+                            <input type="range" id="modal-loudness" min="-50" max="0" value="-8" step="0.5" oninput="document.getElementById('modal-val-loud').innerText = this.value + ' dB'" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Instrumental:</label>
+                                <span id="modal-val-inst" class="text-spotify-green font-bold">0.05</span>
+                            </div>
+                            <input type="range" id="modal-instrumentalness" min="0" max="1" value="0.05" step="0.01" oninput="document.getElementById('modal-val-inst').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="modal-explicit" class="accent-spotify-green w-4 h-4 rounded cursor-pointer">
+                        <label for="modal-explicit" class="text-xs text-zinc-300 cursor-pointer">Contenido explícito (Explicit)</label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="cerrarModalCRUD()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300 rounded-full transition-all">Cancelar</button>
+                    <button type="submit" id="modal-submit-btn" class="px-5 py-2 bg-spotify-green hover:bg-spotify-hover text-black text-xs font-black rounded-full flex items-center gap-2 transition-all shadow-lg shadow-spotify-green/20">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Guardar y Evaluar ML</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE LA APLICACIÓN -->
     <script>
-        /*
-          Spotify Dataset matching schema from image:
-          release_date, genre, duration_ms, popularity, danceability, energy, key, loudness, mode, instrumentalness, tempo, stream_count, country, explicit, label
-        */
-        const defaultDataset = [
-            { id: 1, release_date: "21-03-2023", genre: "Country", duration_ms: 415975, popularity: 41, danceability: 77, energy: 65, key: 9, loudness: -4206, mode: 1, instrumentalness: 68, tempo: 1605, stream_count: 1000, country: "Germany", explicit: 0, label: "Columbia" },
-            { id: 2, release_date: "25-09-2018", genre: "Rock", duration_ms: 294399, popularity: 33, danceability: 18, energy: 74, key: 1, loudness: -1432, mode: 1, instrumentalness: 194, tempo: 1158, stream_count: 2000, country: "Australia", explicit: 0, label: "Universal Music" },
-            { id: 3, release_date: "24-03-2025", genre: "Hip-Hop", duration_ms: 377789, popularity: 35, danceability: 77, energy: 16, key: 6, loudness: -1159, mode: 0, instrumentalness: 186, tempo: 14773, stream_count: 1000, country: "Mexico", explicit: 0, label: "Independent" },
-            { id: 4, release_date: "17-05-2019", genre: "R&B", duration_ms: 180751, popularity: 39, danceability: 53, energy: 25, key: 5, loudness: -4745, mode: 0, instrumentalness: 685, tempo: 19734, stream_count: 1000, country: "India", explicit: 1, label: "Columbia" },
-            { id: 5, release_date: "19-08-2024", genre: "Country", duration_ms: 96720, popularity: 43, danceability: 7, energy: 5, key: 6, loudness: -236, mode: 1, instrumentalness: 331, tempo: 10382, stream_count: 1000, country: "Canada", explicit: 0, label: "Columbia" },
-            { id: 6, release_date: "10-06-2018", genre: "Rock", duration_ms: 93516, popularity: 34, danceability: 3, energy: 92, key: 10, loudness: -2444, mode: 1, instrumentalness: 304, tempo: 9141, stream_count: 1000, country: "Canada", explicit: 0, label: "Warner Music" },
-            { id: 7, release_date: "25-02-2025", genre: "Pop", duration_ms: 392799, popularity: 57, danceability: 26, energy: 72, key: 1, loudness: -5076, mode: 1, instrumentalness: 567, tempo: 10653, stream_count: 1000, country: "Japan", explicit: 1, label: "Columbia" },
-            { id: 8, release_date: "30-03-2020", genre: "Pop", duration_ms: 220093, popularity: 60, danceability: 82, energy: 87, key: 5, loudness: -2477, mode: 1, instrumentalness: 20, tempo: 12095, stream_count: 230000, country: "United Kingdom", explicit: 0, label: "Island Records" },
-            { id: 9, release_date: "05-07-2017", genre: "Reggaeton", duration_ms: 292401, popularity: 45, danceability: 88, energy: 81, key: 6, loudness: -3698, mode: 1, instrumentalness: 10, tempo: 9800, stream_count: 87000, country: "France", explicit: 1, label: "Warner Music" },
-            { id: 10, release_date: "16-12-2019", genre: "R&B", duration_ms: 382053, popularity: 48, danceability: 52, energy: 68, key: 7, loudness: -2195, mode: 1, instrumentalness: 279, tempo: 15171, stream_count: 32000, country: "France", explicit: 0, label: "Warner Music" },
-            { id: 11, release_date: "20-06-2021", genre: "Metal", duration_ms: 270685, popularity: 52, danceability: 36, energy: 95, key: 0, loudness: -1119, mode: 1, instrumentalness: 779, tempo: 14653, stream_count: 5000, country: "Japan", explicit: 0, label: "EMI" },
-            { id: 12, release_date: "22-08-2024", genre: "Jazz", duration_ms: 245994, popularity: 42, danceability: 71, energy: 49, key: 2, loudness: -384, mode: 0, instrumentalness: 545, tempo: 15274, stream_count: 11000, country: "Australia", explicit: 1, label: "XL Recordings" }
-        ];
+        // ==========================================
+        // 1. DATASET Y CARGA DE METRICAS GLOBALES
+        // ==========================================
+        let songDataset = [];
+        let genreChartInstance = null;
+        let countryChartInstance = null;
+        let attributeChartInstance = null;
+        let currentAttribute = 'genre';
+        let listaCancionesCache = [];
 
-        let songDataset = JSON.parse(JSON.stringify(defaultDataset));
+        const genresList = ['Pop', 'Rock', 'Reggaeton', 'Hip-Hop', 'EDM', 'Metal', 'R&B', 'Indie', 'Folk', 'Jazz', 'Classical', 'Country'];
+        const countriesList = ['Chile', 'Mexico', 'United States', 'Brazil', 'United Kingdom', 'Germany', 'Japan'];
 
-        let activeTab = 'dashboard';
-        let currentSelectedAttr = 'genre';
+        function generateRealisticDataset() {
+            const data = [];
+            const titles = ['Midnight Sun', 'Perreo Total', 'Dark Horizon', 'Neon Love', 'Echoes of You', 'Cordillera', 'Summer Breeze', 'Urban Beat', 'Firestorm', 'Memories', 'Luna Nueva', 'Rhythm Wave'];
+            const artists = ['Luna Rivera', 'DJ FlowCL', 'The Shadow Project', 'Neon Pulse', 'Valen Paz', 'Cuarteto Andes', 'El Jordan', 'CyberBass', 'Sonia M', 'Rockers Band'];
 
-        let genreBarChart, countryDoughnutChart;
-        let singleAttrBarChart, singleAttrDoughnutChart;
-
-        window.onload = function() {
-            initDashboardCharts();
-            initSingleAttrCharts();
-            updateApp();
-        };
+            for (let i = 1; i <= 200; i++) {
+                const g = genresList[Math.floor(Math.random() * genresList.length)];
+                const c = countriesList[Math.floor(Math.random() * countriesList.length)];
+                const pop = Math.floor(Math.random() * 85) + 15;
+                const streams = Math.floor(Math.random() * 8000000) + 100000;
+                data.push({
+                    id: i,
+                    title: titles[Math.floor(Math.random() * titles.length)] + ' #' + i,
+                    artist: artists[Math.floor(Math.random() * artists.length)],
+                    genre: g,
+                    country: c,
+                    stream_count: streams,
+                    popularity: pop,
+                    danceability: Number((Math.random() * 0.6 + 0.35).toFixed(2)),
+                    energy: Number((Math.random() * 0.7 + 0.25).toFixed(2)),
+                    tempo: Math.floor(Math.random() * 80) + 80,
+                    explicit: Math.random() > 0.75 ? 1 : 0,
+                    release_date: (2015 + Math.floor(Math.random() * 11)).toString()
+                });
+            }
+            return data;
+        }
 
         function reloadDefaultDataset() {
-            songDataset = JSON.parse(JSON.stringify(defaultDataset));
+            songDataset = generateRealisticDataset();
             updateApp();
-            showToast("Dataset restablecido con los valores iniciales");
+            showToast('Dataset recargado con éxito');
         }
 
+        // ==========================================
+        // 2. DASHBOARD Y GRAFICOS CHART.JS
+        // ==========================================
         function updateApp() {
-            const genreMap = {};
-            const countryMap = {};
-            let totalStreams = 0;
-            let weightedPopSum = 0;
-            let explicitCount = 0;
+            if (!songDataset.length) songDataset = generateRealisticDataset();
 
-            songDataset.forEach(song => {
-                const streams = song.stream_count || 0;
-                totalStreams += streams;
+            // KPIs
+            const totalStreams = songDataset.reduce((sum, item) => sum + item.stream_count, 0);
+            const avgPop = Math.round(songDataset.reduce((sum, item) => sum + item.popularity, 0) / songDataset.length);
+            const explicitCount = songDataset.filter(item => item.explicit === 1).length;
+            const explicitRatio = Math.round((explicitCount / songDataset.length) * 100);
 
-                // Genre Aggregations
-                if (!genreMap[song.genre]) genreMap[song.genre] = { streams: 0, count: 0 };
-                genreMap[song.genre].streams += streams;
-                genreMap[song.genre].count += 1;
-
-                // Country Aggregations
-                if (!countryMap[song.country]) countryMap[song.country] = 0;
-                countryMap[song.country] += streams;
-
-                weightedPopSum += (song.popularity || 0) * streams;
-
-                if (song.explicit === 1) explicitCount++;
-            });
-
-            const totalTracks = songDataset.length;
-
-            // Update Dashboard Main KPIs
-            document.getElementById('kpi-total-streams').innerText = totalStreams.toLocaleString();
-            document.getElementById('sidebar-streams-badge').innerText = `${totalStreams.toLocaleString()} Oyentes Totales`;
-            document.getElementById('kpi-total-records-count').innerText = `Calculado sobre ${totalTracks} registros`;
-
-            document.getElementById('sidebar-total-records').innerText = totalTracks;
-            document.getElementById('sidebar-total-genres').innerText = Object.keys(genreMap).length;
-            document.getElementById('sidebar-total-countries').innerText = Object.keys(countryMap).length;
-
-            // Sort genres
-            const sortMode = document.getElementById('genre-sort-select').value;
-            const sortedGenres = Object.keys(genreMap).map(g => ({
-                genre: g,
-                streams: genreMap[g].streams,
-                count: genreMap[g].count,
-                percentage: totalStreams ? ((genreMap[g].streams / totalStreams) * 100).toFixed(1) + '%' : '0%'
-            })).sort((a, b) => sortMode === 'streams' ? b.streams - a.streams : b.count - a.count);
-
-            if (sortedGenres.length > 0) {
-                document.getElementById('kpi-top-streamed-genre').innerText = sortedGenres[0].genre;
-                document.getElementById('kpi-genre-stream-share').innerText = `${sortedGenres[0].streams.toLocaleString()} oyentes (${sortedGenres[0].percentage})`;
-            } else {
-                document.getElementById('kpi-top-streamed-genre').innerText = "-";
-                document.getElementById('kpi-genre-stream-share').innerText = "0%";
-            }
-
-            // Top Country
-            const sortedCountries = Object.keys(countryMap).map(c => ({
-                country: c,
-                streams: countryMap[c],
-                percentage: totalStreams ? ((countryMap[c] / totalStreams) * 100).toFixed(1) + '%' : '0%'
-            })).sort((a, b) => b.streams - a.streams);
-
-            if (sortedCountries.length > 0) {
-                document.getElementById('kpi-top-country').innerText = sortedCountries[0].country;
-                document.getElementById('kpi-country-streams-share').innerText = `${sortedCountries[0].streams.toLocaleString()} oyentes (${sortedCountries[0].percentage})`;
-            } else {
-                document.getElementById('kpi-top-country').innerText = "-";
-                document.getElementById('kpi-country-streams-share').innerText = "0 oyentes";
-            }
-
-            document.getElementById('country-count-badge').innerText = `${sortedCountries.length} Países Identificados`;
-
-            // Popularity & Explicit
-            const avgWeightedPop = totalStreams ? (weightedPopSum / totalStreams).toFixed(1) : 0;
-            const explicitRatio = totalTracks ? ((explicitCount / totalTracks) * 100).toFixed(1) : 0;
-
-            document.getElementById('kpi-avg-popularity').innerText = `${avgWeightedPop} / 100`;
+            document.getElementById('kpi-total-streams').innerText = (totalStreams / 1000000).toFixed(1) + ' M';
+            document.getElementById('kpi-total-records-count').innerText = `Calculado sobre ${songDataset.length} canciones`;
+            document.getElementById('kpi-avg-popularity').innerText = `${avgPop} / 100`;
             document.getElementById('kpi-explicit-ratio').innerText = `${explicitRatio}% contenido explícito`;
 
-            // Update Dashboard Charts
-            updateDashboardCharts(sortedGenres, sortedCountries);
+            // Streams por género
+            const streamsByGenre = {};
+            songDataset.forEach(s => {
+                streamsByGenre[s.genre] = (streamsByGenre[s.genre] || 0) + s.stream_count;
+            });
+            const topGenre = Object.keys(streamsByGenre).sort((a,b) => streamsByGenre[b] - streamsByGenre[a])[0];
+            const topGenrePct = Math.round((streamsByGenre[topGenre] / totalStreams) * 100);
+            document.getElementById('kpi-top-streamed-genre').innerText = topGenre;
+            document.getElementById('kpi-genre-stream-share').innerText = `${topGenrePct}% de oyentes totales`;
 
-            // Render Genre Cards
-            renderGenreCards(sortedGenres);
+            // Streams por país
+            const streamsByCountry = {};
+            songDataset.forEach(s => {
+                streamsByCountry[s.country] = (streamsByCountry[s.country] || 0) + s.stream_count;
+            });
+            const topCountry = Object.keys(streamsByCountry).sort((a,b) => streamsByCountry[b] - streamsByCountry[a])[0];
+            document.getElementById('kpi-top-country').innerText = topCountry;
+            document.getElementById('kpi-country-streams-share').innerText = `${(streamsByCountry[topCountry] / 1000000).toFixed(1)} M oyentes`;
+            document.getElementById('country-count-badge').innerText = `${Object.keys(streamsByCountry).length} Países Identificados`;
 
-            // Update Individual Attribute Analysis
-            updateSingleAttributeAnalysis();
+            renderGenreChart(streamsByGenre);
+            renderCountryChart(streamsByCountry);
+            renderGenreCards(streamsByGenre, totalStreams);
+            renderAttributeAnalysis();
         }
 
-        function renderGenreCards(sortedGenres) {
-            const colors = ["#1DB954", "#ec4899", "#8b5cf6", "#f59e0b", "#06b6d4", "#ef4444", "#3b82f6", "#10b981", "#6b7280"];
-            const icons = ["fa-guitar", "fa-fire", "fa-bolt", "fa-microphone", "fa-music", "fa-drum", "fa-compact-disc"];
+        function renderGenreChart(streamsByGenre) {
+            const ctx = document.getElementById('genreStreamsBarChart');
+            if (!ctx) return;
+            const labels = Object.keys(streamsByGenre);
+            const data = Object.values(streamsByGenre).map(v => (v / 1000000).toFixed(2));
 
-            const container = document.getElementById('genre-cards-container');
-            if (sortedGenres.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center text-zinc-500 py-6">Dataset vacío.</div>`;
-                return;
-            }
-
-            container.innerHTML = sortedGenres.map((g, idx) => {
-                const color = colors[idx % colors.length];
-                const icon = icons[idx % icons.length];
-                return `
-                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-all flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background-color: ${color}20; color: ${color}">
-                                <i class="fa-solid ${icon} text-lg"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-xs text-white">${g.genre}</h4>
-                                <p class="text-[11px] text-spotify-green font-mono font-bold">${g.streams.toLocaleString()} oyentes</p>
-                                <p class="text-[10px] text-zinc-500">${g.count} canción(es)</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-black text-white px-2.5 py-1 bg-zinc-900 rounded-md border border-zinc-800 font-mono">${g.percentage}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function initDashboardCharts() {
-            // 1. Dashboard Genre Bar Chart
-            const ctxBar = document.getElementById('genreStreamsBarChart').getContext('2d');
-            genreBarChart = new Chart(ctxBar, {
+            if (genreChartInstance) genreChartInstance.destroy();
+            genreChartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Oyentes (stream_count)', data: [], backgroundColor: '#1DB954', borderRadius: 8 }] },
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Millones de Oyentes',
+                        data: data,
+                        backgroundColor: '#1DB954',
+                        borderRadius: 6
+                    }]
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } }
+                        x: { grid: { display: false }, ticks: { color: '#a1a1aa' } },
+                        y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa' } }
                     }
                 }
             });
+        }
 
-            // 2. Dashboard Country Doughnut Chart
-            const ctxDoughnut = document.getElementById('countryDoughnutChart').getContext('2d');
-            countryDoughnutChart = new Chart(ctxDoughnut, {
+        function renderCountryChart(streamsByCountry) {
+            const ctx = document.getElementById('countryDoughnutChart');
+            if (!ctx) return;
+            const labels = Object.keys(streamsByCountry);
+            const data = Object.values(streamsByCountry);
+
+            if (countryChartInstance) countryChartInstance.destroy();
+            countryChartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 2, borderColor: '#181818' }] },
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#1DB954', '#3b82f6', '#a855f7', '#f59e0b', '#ec4899', '#14b8a6', '#f97316'],
+                        borderWidth: 0
+                    }]
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 9 }, boxWidth: 10 } } },
+                    plugins: { legend: { display: false } },
                     cutout: '70%'
                 }
             });
         }
 
-        function initSingleAttrCharts() {
-            // 1. Single Attribute Bar Chart
-            const ctxBar = document.getElementById('singleAttributeBarChart').getContext('2d');
-            singleAttrBarChart = new Chart(ctxBar, {
+        function renderGenreCards(streamsByGenre, totalStreams) {
+            const container = document.getElementById('genre-cards-container');
+            if (!container) return;
+            container.innerHTML = Object.entries(streamsByGenre).slice(0, 8).map(([genre, streams]) => {
+                const pct = ((streams / totalStreams) * 100).toFixed(1);
+                return `
+                    <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-extrabold text-white text-sm">${genre}</span>
+                            <span class="text-xs font-bold text-spotify-green">${pct}%</span>
+                        </div>
+                        <p class="text-xs text-zinc-400">${(streams / 1000000).toFixed(1)} M oyentes</p>
+                        <div class="w-full bg-zinc-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div class="bg-spotify-green h-full rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectIndividualAttribute(attr) {
+            currentAttribute = attr;
+            document.querySelectorAll('.attr-pill').forEach(btn => {
+                btn.className = 'attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700';
+            });
+            const selectedBtn = document.getElementById(`attr-btn-${attr}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-spotify-green text-black shadow-md shadow-spotify-green/20';
+            }
+            renderAttributeAnalysis();
+        }
+
+        function renderAttributeAnalysis() {
+            const ctx = document.getElementById('individualAttributeChart');
+            if (!ctx) return;
+
+            const agg = {};
+            songDataset.forEach(s => {
+                let key = s[currentAttribute];
+                if (typeof key === 'number' && currentAttribute !== 'explicit') {
+                    key = currentAttribute === 'popularity' ? `${Math.floor(key/20)*20}-${Math.floor(key/20)*20+19}` : `${key.toFixed(1)}`;
+                } else if (currentAttribute === 'explicit') {
+                    key = key === 1 ? 'Explícito' : 'Limpio';
+                }
+                agg[key] = (agg[key] || 0) + s.stream_count;
+            });
+
+            const labels = Object.keys(agg);
+            const values = Object.values(agg).map(v => (v / 1000000).toFixed(2));
+            const total = Object.values(agg).reduce((a, b) => a + b, 0);
+
+            document.getElementById('attribute-chart-title').innerText = `Distribución de Oyentes por: ${currentAttribute.toUpperCase()}`;
+            document.getElementById('attribute-badge').innerText = `Total Categorías: ${labels.length}`;
+
+            if (attributeChartInstance) attributeChartInstance.destroy();
+            attributeChartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Oyentes Totales', data: [], backgroundColor: '#1DB954', borderRadius: 8 }] },
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: '#1DB954',
+                        borderRadius: 6
+                    }]
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } }
+                        x: { grid: { display: false }, ticks: { color: '#a1a1aa' } },
+                        y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa' } }
                     }
                 }
             });
 
-            // 2. Single Attribute Doughnut Chart
-            const ctxDoughnut = document.getElementById('singleAttributeDoughnutChart').getContext('2d');
-            singleAttrDoughnutChart = new Chart(ctxDoughnut, {
-                type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 2, borderColor: '#181818' }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 9 }, boxWidth: 10 } } },
-                    cutout: '65%'
-                }
-            });
-        }
-
-        function updateDashboardCharts(genresList, countriesList) {
-            const colors = ["#1DB954", "#ec4899", "#8b5cf6", "#f59e0b", "#06b6d4", "#ef4444", "#3b82f6", "#10b981", "#6b7280"];
-
-            genreBarChart.data.labels = genresList.map(g => g.genre);
-            genreBarChart.data.datasets[0].data = genresList.map(g => g.streams);
-            genreBarChart.data.datasets[0].backgroundColor = genresList.map((_, i) => colors[i % colors.length]);
-            genreBarChart.update();
-
-            countryDoughnutChart.data.labels = countriesList.map(c => c.country);
-            countryDoughnutChart.data.datasets[0].data = countriesList.map(c => c.streams);
-            countryDoughnutChart.data.datasets[0].backgroundColor = countriesList.map((_, i) => colors[i % colors.length]);
-            countryDoughnutChart.update();
-        }
-
-        function selectIndividualAttribute(attrKey) {
-            currentSelectedAttr = attrKey;
-
-            // Highlight pill button
-            document.querySelectorAll('.attr-pill').forEach(btn => {
-                btn.classList.remove('bg-spotify-green', 'text-black', 'shadow-md', 'shadow-spotify-green/20');
-                btn.classList.add('bg-zinc-800', 'text-zinc-300');
-            });
-
-            const activeBtn = document.getElementById(`attr-btn-${attrKey}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-spotify-green', 'text-black', 'shadow-md', 'shadow-spotify-green/20');
-                activeBtn.classList.remove('bg-zinc-800', 'text-zinc-300');
-            }
-
-            updateSingleAttributeAnalysis();
-        }
-
-        function updateSingleAttributeAnalysis() {
-            const attrMap = {
-                'genre': { title: 'Género Musical (`genre`)', desc: 'Suma de oyentes por cada género' },
-                'country': { title: 'País (`country`)', desc: 'Distribución geográfica de oyentes' },
-                'release_date': { title: 'Año de Lanzamiento (`release_date`)', desc: 'Oyentes según el año de publicación' },
-                'popularity': { title: 'Rango de Popularidad (`popularity`)', desc: 'Oyentes agrupados por nivel de popularidad (0-100)' },
-                'danceability': { title: 'Bailabilidad (`danceability`)', desc: 'Oyentes agrupados por grado de danceability' },
-                'energy': { title: 'Energía (`energy`)', desc: 'Oyentes agrupados por intensidad y energía sonora' },
-                'explicit': { title: 'Contenido Explícito (`explicit`)', desc: 'Oyentes en canciones explicit (1) vs clean (0)' }
-            };
-
-            const info = attrMap[currentSelectedAttr] || { title: currentSelectedAttr, desc: 'Segmentación univariada' };
-
-            document.getElementById('single-attr-name').innerText = info.title;
-            document.getElementById('single-attr-desc').innerText = info.desc;
-            document.getElementById('single-attr-chart-title').innerText = `Oyentes por ${info.title}`;
-            document.getElementById('table-attr-label').innerText = info.title;
-
-            // Group data by selected attribute
-            const aggregated = {};
-            let totalStreams = 0;
-
-            songDataset.forEach(song => {
-                const streams = song.stream_count || 0;
-                totalStreams += streams;
-
-                let keyVal = "Sin Especificar";
-
-                if (currentSelectedAttr === 'genre') {
-                    keyVal = song.genre || 'Desconocido';
-                } else if (currentSelectedAttr === 'country') {
-                    keyVal = song.country || 'Global';
-                } else if (currentSelectedAttr === 'release_date') {
-                    // Extract year from DD-MM-YYYY or YYYY-MM-DD
-                    if (song.release_date && song.release_date.length >= 4) {
-                        const parts = song.release_date.split('-');
-                        keyVal = parts.length === 3 ? parts[2] : song.release_date.substring(0, 4);
-                    } else {
-                        keyVal = 'Año Desconocido';
-                    }
-                } else if (currentSelectedAttr === 'popularity') {
-                    const pop = song.popularity || 0;
-                    if (pop <= 25) keyVal = '0-25 (Muy Baja)';
-                    else if (pop <= 50) keyVal = '26-50 (Media-Baja)';
-                    else if (pop <= 75) keyVal = '51-75 (Alta)';
-                    else keyVal = '76-100 (Top Streamed)';
-                } else if (currentSelectedAttr === 'danceability') {
-                    const d = song.danceability || 0;
-                    if (d < 30) keyVal = 'Baja (<30%)';
-                    else if (d <= 60) keyVal = 'Moderada (30-60%)';
-                    else keyVal = 'Alta Danceability (>60%)';
-                } else if (currentSelectedAttr === 'energy') {
-                    const e = song.energy || 0;
-                    if (e < 30) keyVal = 'Relajada (<30%)';
-                    else if (e <= 60) keyVal = 'Energía Moderada (30-60%)';
-                    else keyVal = 'Alta Energía (>60%)';
-                } else if (currentSelectedAttr === 'explicit') {
-                    keyVal = song.explicit === 1 ? 'Explicit (1)' : 'Clean (0)';
-                }
-
-                if (!aggregated[keyVal]) {
-                    aggregated[keyVal] = { streams: 0, count: 0, popSum: 0 };
-                }
-                aggregated[keyVal].streams += streams;
-                aggregated[keyVal].count += 1;
-                aggregated[keyVal].popSum += song.popularity || 0;
-            });
-
-            // Convert to array and sort by stream_count descending
-            const segments = Object.keys(aggregated).map(key => {
-                const streams = aggregated[key].streams;
-                const count = aggregated[key].count;
-                const avgPop = count ? (aggregated[key].popSum / count).toFixed(1) : 0;
-                const percentage = totalStreams ? ((streams / totalStreams) * 100).toFixed(1) : 0;
-                return { category: key, streams, count, avgPop, percentage };
-            }).sort((a, b) => b.streams - a.streams);
-
-            // Update Insights KPIs
-            if (segments.length > 0) {
-                document.getElementById('single-attr-top-segment').innerText = segments[0].category;
-                document.getElementById('single-attr-top-share').innerText = `${segments[0].streams.toLocaleString()} oyentes (${segments[0].percentage}%)`;
-            } else {
-                document.getElementById('single-attr-top-segment').innerText = "-";
-                document.getElementById('single-attr-top-share').innerText = "0 oyentes";
-            }
-            document.getElementById('single-attr-count').innerText = segments.length;
-
-            // Update Charts
-            const colors = ["#1DB954", "#3b82f6", "#ec4899", "#f59e0b", "#8b5cf6", "#06b6d4", "#ef4444", "#10b981", "#6b7280"];
-
-            singleAttrBarChart.data.labels = segments.map(s => s.category);
-            singleAttrBarChart.data.datasets[0].data = segments.map(s => s.streams);
-            singleAttrBarChart.data.datasets[0].backgroundColor = segments.map((_, i) => colors[i % colors.length]);
-            singleAttrBarChart.update();
-
-            singleAttrDoughnutChart.data.labels = segments.map(s => s.category);
-            singleAttrDoughnutChart.data.datasets[0].data = segments.map(s => s.streams);
-            singleAttrDoughnutChart.data.datasets[0].backgroundColor = segments.map((_, i) => colors[i % colors.length]);
-            singleAttrDoughnutChart.update();
-
-            // Render Table
-            renderSingleAttrTable(segments);
-        }
-
-        function renderSingleAttrTable(segments) {
-            const tbody = document.getElementById('single-attribute-table-body');
-            if (segments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-zinc-500">Sin datos de segmentación.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = segments.map((seg, idx) => `
-                <tr class="hover:bg-zinc-900/80 transition-colors">
-                    <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
-                        <span class="text-xs text-zinc-500 font-mono w-5">${idx + 1}.</span>
-                        ${seg.category}
-                    </td>
-                    <td class="py-3 px-4 text-right font-black text-spotify-green font-mono">${seg.streams.toLocaleString()}</td>
-                    <td class="py-3 px-4 text-center">
-                        <span class="px-2 py-0.5 rounded bg-spotify-green/10 text-spotify-green font-bold text-xs">${seg.percentage}%</span>
-                    </td>
-                    <td class="py-3 px-4 text-center text-zinc-300">${seg.count} pista(s)</td>
-                    <td class="py-3 px-4 text-center text-amber-400 font-bold">${seg.avgPop}</td>
+            const tbody = document.getElementById('attribute-table-body');
+            tbody.innerHTML = Object.entries(agg).map(([seg, count]) => `
+                <tr class="hover:bg-zinc-800/40">
+                    <td class="py-2.5 px-3 font-semibold text-white">${seg}</td>
+                    <td class="py-2.5 px-3 text-right text-zinc-300">${(count / 1000000).toFixed(2)} M</td>
+                    <td class="py-2.5 px-3 text-center text-spotify-green font-bold">${((count / total) * 100).toFixed(1)}%</td>
                 </tr>
             `).join('');
         }
 
+        // ==========================================
+        // 3. NAVEGACION ENTRE PESTAÑAS
+        // ==========================================
         function switchTab(tabId) {
-            activeTab = tabId;
-
-            // Hide tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            
-            // Unhighlight nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-spotify-green/10', 'text-spotify-green');
                 btn.classList.add('text-zinc-400');
             });
 
-            // Show active tab
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.remove('hidden');
 
-            // Highlight active nav
             const targetNav = document.getElementById(`nav-${tabId}`);
             if (targetNav) {
                 targetNav.classList.add('bg-spotify-green/10', 'text-spotify-green');
                 targetNav.classList.remove('text-zinc-400');
             }
 
-            // Headers
             const titleMap = {
                 'dashboard': 'Análisis Global de Oyentes (`stream_count`)',
                 'segmentation': 'Segmentación por Atributo Individual',
-                'prediction': 'Simulador Machine Learning (Predicción y Segmentación)'
+                'prediction': 'Simulador Machine Learning (Predicción y Segmentación)',
+                'portfolio': 'Portafolio de Canciones & Gestión CRUD (SQLite)'
             };
             const subtitleMap = {
                 'dashboard': 'Procesamiento y segmentación cuantitativa de reproducciones basadas en el dataset de Spotify.',
-                'segmentation': 'Analiza qué cantidad de oyentes tiene cada atributo por separado (género, fecha, país, energía, danceability, etc.).',
-                'prediction': 'Inferencia en tiempo real utilizando los modelos entrenados en Google Colab (Árbol de Decisión, K-Means y Apriori).'
+                'segmentation': 'Analiza qué cantidad de oyentes tiene cada atributo por separado.',
+                'prediction': 'Inferencia en tiempo real utilizando los modelos entrenados (Árbol de Decisión, K-Means y Apriori).',
+                'portfolio': 'Persistencia y administración relacional SQLite de demos musicales evaluados por la IA.'
             };
 
-            document.getElementById('header-title').innerText = titleMap[tabId];
-            document.getElementById('header-subtitle').innerText = subtitleMap[tabId];
+            document.getElementById('header-title').innerText = titleMap[tabId] || 'SoundData Analytics';
+            document.getElementById('header-subtitle').innerText = subtitleMap[tabId] || '';
+
+            if (tabId === 'portfolio') {
+                cargarCancionesCRUD();
+            }
         }
 
-        function exportDatasetSummary() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(songDataset, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "spotify_stream_segmentation_summary.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Resumen de oyentes exportado en formato JSON");
-        }
+        // ==========================================
+        // 4. SIMULADOR MACHINE LEARNING (POST /api/predecir)
+        // ==========================================
+        let ultimaPrediccionML = null;
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            toast.classList.remove('translate-y-[-150%]');
-            setTimeout(() => {
-                toast.classList.add('translate-y-[-150%]');
-            }, 3000);
-        }
-    
-        // Lógica de consumo de API Machine Learning (POST /api/predecir)
         async function ejecutarPrediccion() {
             const btn = document.getElementById('btn-predecir');
             btn.disabled = true;
@@ -1249,7 +1069,9 @@
                 const data = await response.json();
                 
                 if (data.exito) {
-                    // Actualizar Árbol de Decisión
+                    ultimaPrediccionML = data;
+
+                    // Árbol de Decisión
                     const hitBadge = document.getElementById('res-hit-badge');
                     const hitTitle = document.getElementById('res-hit-title');
                     const hitProb = document.getElementById('res-hit-prob');
@@ -1265,13 +1087,13 @@
                     }
                     hitProb.innerText = `${data.probabilidad_hit}%`;
                     
-                    // Actualizar K-Means
+                    // K-Means
                     document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
                     document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
                     document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
                     document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
                     
-                    // Actualizar Apriori
+                    // Apriori
                     const recomList = document.getElementById('res-recom-list');
                     recomList.innerHTML = '';
                     data.recomendaciones.forEach(rec => {
@@ -1283,7 +1105,7 @@
                     
                     showToast('¡Predicción y segmentación completadas!');
                 } else {
-                    showToast('Error en la predicción');
+                    showToast('Error en la respuesta del modelo');
                 }
             } catch (err) {
                 console.error(err);
@@ -1294,6 +1116,299 @@
             }
         }
 
+        async function guardarDesdeSimulador() {
+            const trackName = document.getElementById('sim-track-name').value.trim() || 'Demo sin título';
+            const artistName = document.getElementById('sim-artist-name').value.trim() || 'Artista Anónimo';
+
+            const payload = {
+                track_name: trackName,
+                artist_name: artistName,
+                genre: document.getElementById('input-genre').value,
+                country: document.getElementById('input-country').value,
+                tempo: parseFloat(document.getElementById('input-tempo').value),
+                danceability: parseFloat(document.getElementById('input-dance').value),
+                energy: parseFloat(document.getElementById('input-energy').value),
+                loudness: parseFloat(document.getElementById('input-loud').value),
+                instrumentalness: parseFloat(document.getElementById('input-inst').value),
+                explicit: document.getElementById('input-explicit').checked ? 1 : 0
+            };
+
+            const btn = document.getElementById('btn-guardar-sim');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const response = await fetch('/api/canciones', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const res = await response.json();
+                if (res.exito) {
+                    showToast(`Canción '${trackName}' guardada en SQLite con éxito`);
+                    switchTab('portfolio');
+                } else {
+                    showToast('Error al guardar en el portafolio');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de red al guardar canción');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-spotify-green"></i><span>💾 Guardar Track en Portafolio SQLite</span>';
+            }
+        }
+
+        // ==========================================
+        // 5. MODULO CRUD CON SQLITE (/api/canciones)
+        // ==========================================
+        async function cargarCancionesCRUD() {
+            const genre = document.getElementById('crud-filter-genre').value;
+            const hit = document.getElementById('crud-filter-hit').value;
+            const q = document.getElementById('crud-search-input').value.trim();
+
+            let url = '/api/canciones?';
+            if (genre) url += `genre=${encodeURIComponent(genre)}&`;
+            if (hit !== '') url += `hit=${encodeURIComponent(hit)}&`;
+            if (q) url += `q=${encodeURIComponent(q)}&`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.exito) {
+                    listaCancionesCache = data.canciones;
+                    renderizarTablaCRUD(data.canciones);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error al cargar catálogo de canciones');
+            }
+        }
+
+        function filtrarCancionesCRUD() {
+            const q = document.getElementById('crud-search-input').value.toLowerCase();
+            const filtradas = listaCancionesCache.filter(c => 
+                c.track_name.toLowerCase().includes(q) || 
+                c.artist_name.toLowerCase().includes(q)
+            );
+            renderizarTablaCRUD(filtradas);
+        }
+
+        function renderizarTablaCRUD(canciones) {
+            const tbody = document.getElementById('crud-table-body');
+            
+            // Actualizar métricas del resumen
+            document.getElementById('crud-stat-total').innerText = canciones.length;
+            const hits = canciones.filter(c => c.es_hit).length;
+            document.getElementById('crud-stat-hits').innerText = hits;
+            document.getElementById('crud-stat-nicho').innerText = canciones.length - hits;
+
+            if (canciones.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-zinc-500">
+                            No se encontraron canciones registradas con los filtros actuales.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = canciones.map(c => `
+                <tr class="hover:bg-zinc-800/40 transition-colors">
+                    <td class="py-3 px-4 font-mono text-zinc-500 text-xs">#${c.id}</td>
+                    <td class="py-3 px-4">
+                        <p class="font-bold text-white text-xs">${c.track_name}</p>
+                        <p class="text-[11px] text-zinc-400">${c.artist_name}</p>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-semibold text-[10px]">${c.genre}</span>
+                        <span class="text-zinc-500 text-[10px] ml-1">${c.country}</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs">
+                        <span class="text-zinc-300 font-mono">${Math.round(c.tempo)} BPM</span>
+                        <span class="text-zinc-500 text-[10px] ml-1">E:${c.energy.toFixed(2)} D:${c.danceability.toFixed(2)}</span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${c.es_hit 
+                            ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-spotify-green/20 text-spotify-green border border-spotify-green/30">HIT (${c.probabilidad_hit}%)</span>`
+                            : `<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">NICHO (${c.probabilidad_hit}%)</span>`
+                        }
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-medium text-[10px]">C${c.cluster_id}: ${c.cluster_nombre}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="flex justify-end gap-1.5">
+                            <button onclick="abrirModalEditarCancion(${c.id})" class="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all" title="Editar Atributos">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="eliminarCancionCRUD(${c.id}, '${c.track_name.replace(/'/g, "\'")}')" class="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all" title="Eliminar de Portafolio">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // 6. MODAL INTERACTIVO CREAR / EDITAR
+        // ==========================================
+        function abrirModalCrearCancion() {
+            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-music text-spotify-green"></i> <span>Registrar Nueva Canción</span>';
+            document.getElementById('modal-cancion-id').value = '';
+            document.getElementById('modal-track-name').value = '';
+            document.getElementById('modal-artist-name').value = '';
+            document.getElementById('modal-genre').value = 'Pop';
+            document.getElementById('modal-country').value = 'Chile';
+            document.getElementById('modal-tempo').value = 125;
+            document.getElementById('modal-val-tempo').innerText = '125 BPM';
+            document.getElementById('modal-dance').value = 0.70;
+            document.getElementById('modal-val-dance').innerText = '0.70';
+            document.getElementById('modal-energy').value = 0.75;
+            document.getElementById('modal-val-energy').innerText = '0.75';
+            document.getElementById('modal-loudness').value = -8;
+            document.getElementById('modal-val-loud').innerText = '-8 dB';
+            document.getElementById('modal-instrumentalness').value = 0.05;
+            document.getElementById('modal-val-inst').innerText = '0.05';
+            document.getElementById('modal-explicit').checked = false;
+
+            document.getElementById('modal-crud').classList.remove('hidden');
+        }
+
+        function abrirModalEditarCancion(id) {
+            const cancion = listaCancionesCache.find(c => c.id === id);
+            if (!cancion) return;
+
+            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen text-spotify-green"></i> <span>Editar Atributos & Re-evaluar</span>';
+            document.getElementById('modal-cancion-id').value = cancion.id;
+            document.getElementById('modal-track-name').value = cancion.track_name;
+            document.getElementById('modal-artist-name').value = cancion.artist_name;
+            document.getElementById('modal-genre').value = cancion.genre;
+            document.getElementById('modal-country').value = cancion.country;
+            document.getElementById('modal-tempo').value = Math.round(cancion.tempo);
+            document.getElementById('modal-val-tempo').innerText = Math.round(cancion.tempo) + ' BPM';
+            document.getElementById('modal-dance').value = cancion.danceability;
+            document.getElementById('modal-val-dance').innerText = Number(cancion.danceability).toFixed(2);
+            document.getElementById('modal-energy').value = cancion.energy;
+            document.getElementById('modal-val-energy').innerText = Number(cancion.energy).toFixed(2);
+            document.getElementById('modal-loudness').value = cancion.loudness;
+            document.getElementById('modal-val-loud').innerText = cancion.loudness + ' dB';
+            document.getElementById('modal-instrumentalness').value = cancion.instrumentalness;
+            document.getElementById('modal-val-inst').innerText = Number(cancion.instrumentalness).toFixed(2);
+            document.getElementById('modal-explicit').checked = cancion.explicit === 1;
+
+            document.getElementById('modal-crud').classList.remove('hidden');
+        }
+
+        function cerrarModalCRUD() {
+            document.getElementById('modal-crud').classList.add('hidden');
+        }
+
+        async function guardarCancionModal(e) {
+            e.preventDefault();
+            const id = document.getElementById('modal-cancion-id').value;
+            const payload = {
+                track_name: document.getElementById('modal-track-name').value.trim(),
+                artist_name: document.getElementById('modal-artist-name').value.trim(),
+                genre: document.getElementById('modal-genre').value,
+                country: document.getElementById('modal-country').value,
+                tempo: parseFloat(document.getElementById('modal-tempo').value),
+                danceability: parseFloat(document.getElementById('modal-dance').value),
+                energy: parseFloat(document.getElementById('modal-energy').value),
+                loudness: parseFloat(document.getElementById('modal-loudness').value),
+                instrumentalness: parseFloat(document.getElementById('modal-instrumentalness').value),
+                explicit: document.getElementById('modal-explicit').checked ? 1 : 0
+            };
+
+            const btn = document.getElementById('modal-submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                let response;
+                if (id) {
+                    // Actualización (PUT)
+                    response = await fetch(`/api/canciones/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    // Creación (POST)
+                    response = await fetch('/api/canciones', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                const res = await response.json();
+                if (res.exito) {
+                    showToast(res.mensaje || 'Operación realizada con éxito');
+                    cerrarModalCRUD();
+                    cargarCancionesCRUD();
+                } else {
+                    showToast('Error al guardar la canción');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Guardar y Evaluar ML</span>';
+            }
+        }
+
+        async function eliminarCancionCRUD(id, nombre) {
+            if (!confirm(`¿Estás seguro de eliminar '${nombre}' del portafolio?`)) return;
+
+            try {
+                const response = await fetch(`/api/canciones/${id}`, {
+                    method: 'DELETE'
+                });
+                const res = await response.json();
+                if (res.exito) {
+                    showToast(`Canción '${nombre}' eliminada`);
+                    cargarCancionesCRUD();
+                } else {
+                    showToast('Error al eliminar');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión');
+            }
+        }
+
+        // ==========================================
+        // 7. EXPORTACION Y UTILIDADES
+        // ==========================================
+        function exportDatasetSummary() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(songDataset, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "spotify_stream_segmentation_summary.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Resumen de oyentes exportado en formato JSON");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-[-150%]');
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-150%]');
+            }, 3000);
+        }
+
+        // Inicialización al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            reloadDefaultDataset();
+        });
     </script>
 </body>
 </html>

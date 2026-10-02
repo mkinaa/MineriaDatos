@@ -4,12 +4,21 @@ import joblib
 import numpy as np
 import pandas as pd
 from typing import Optional, List
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
+
+from app.database import (
+    init_db,
+    listar_canciones,
+    obtener_cancion,
+    crear_cancion,
+    actualizar_cancion,
+    eliminar_cancion
+)
 
 # Directorios base
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,8 +29,8 @@ STATIC_DIR = os.path.join(BASE_DIR, 'static')
 # Inicialización de la aplicación FastAPI
 app = FastAPI(
     title="SoundData Analytics API",
-    description="API para predicción de éxito musical, clustering de oyentes y reglas de asociación con CRISP-DM",
-    version="1.0.0"
+    description="API para predicción de éxito musical, clustering de oyentes, reglas de asociación con CRISP-DM y gestión de catálogo (CRUD)",
+    version="1.1.0"
 )
 
 # Montaje de archivos estáticos
@@ -71,7 +80,75 @@ CLUSTER_PROFILES = {
     }
 }
 
-# Esquema Pydantic para validar entradas amigablemente (cumple la rúbrica)
+def ejecutar_inferencia(
+    tempo: float,
+    danceability: float,
+    energy: float,
+    loudness: float,
+    instrumentalness: float,
+    explicit: int,
+    genre: str = "Pop",
+    country: str = "Chile"
+) -> dict:
+    """Función unificada de inferencia de Machine Learning (Árbol + K-Means + Apriori)."""
+    if not modelo_arbol or not modelo_kmeans or not scaler:
+        raise HTTPException(status_code=500, detail="Los modelos no están inicializados.")
+    
+    # Vector crudo con nombres de columna esperados
+    X_raw = pd.DataFrame([{
+        'tempo': tempo,
+        'danceability': danceability,
+        'energy': energy,
+        'loudness': loudness,
+        'instrumentalness': instrumentalness,
+        'explicit': explicit
+    }])
+    
+    # 1. Escalado
+    X_scaled = scaler.transform(X_raw)
+    
+    # 2. Árbol de Decisión (Hit vs Nicho)
+    pred_hit = int(modelo_arbol.predict(X_raw)[0])
+    probabilidades = modelo_arbol.predict_proba(X_raw)[0]
+    prob_hit = float(probabilidades[1]) if len(probabilidades) > 1 else float(pred_hit)
+    
+    # 3. K-Means Clustering
+    cluster_id = int(modelo_kmeans.predict(X_scaled)[0])
+    cluster_info = CLUSTER_PROFILES.get(cluster_id, {
+        "nombre": f"Cluster {cluster_id}",
+        "descripcion": "Perfil acústico estándar.",
+        "audiencia": "Audiencia general."
+    })
+    
+    # 4. Motor de Recomendación con Reglas Apriori
+    recomendaciones = []
+    if tempo > 130 and energy > 0.65:
+        recomendaciones.append("Fuerte afinidad detectada para playlists de Cardio/Entrenamiento (Lift > 3.0 en EDM y Rock).")
+    if danceability > 0.65 and genre in ['Pop', 'Reggaeton', 'R&B']:
+        recomendaciones.append("Alta probabilidad de engagement en mercados hispanos y norteamericanos con pauta en discotecas y streaming social.")
+    if loudness > -15.0:
+        recomendaciones.append("Producción moderna con compresión comercial radial óptima.")
+        
+    if not recomendaciones:
+        recomendaciones.append("Canción con perfil equilibrado, ideal para inclusión en listas de descubrimiento semanal y playlists temáticas de descanso.")
+        
+    return {
+        "exito": True,
+        "es_hit": bool(pred_hit == 1),
+        "probabilidad_hit": round(prob_hit * 100, 1),
+        "cluster_id": cluster_id,
+        "cluster_nombre": cluster_info["nombre"],
+        "cluster_descripcion": cluster_info["descripcion"],
+        "cluster_audiencia": cluster_info["audiencia"],
+        "recomendaciones": recomendaciones
+    }
+
+# Evento de inicialización de la Base de Datos SQLite
+@app.on_event("startup")
+def startup_event():
+    init_db(inferencia_fn=ejecutar_inferencia)
+
+# Esquemas Pydantic
 class PredictionInput(BaseModel):
     tempo: float = Field(..., ge=40, le=240, description="Pulsaciones por minuto (BPM)")
     danceability: float = Field(..., ge=0.0, le=1.0, description="Nivel de bailabilidad (0.0 a 1.0)")
@@ -81,6 +158,18 @@ class PredictionInput(BaseModel):
     explicit: int = Field(0, ge=0, le=1, description="Contenido explícito (0 o 1)")
     genre: Optional[str] = "Pop"
     country: Optional[str] = "Chile"
+
+class CancionCRUDInput(BaseModel):
+    track_name: str = Field(..., min_length=1, max_length=150, description="Título de la canción")
+    artist_name: str = Field(..., min_length=1, max_length=150, description="Nombre del artista")
+    genre: str = Field("Pop", description="Género musical")
+    country: str = Field("Chile", description="País objetivo")
+    tempo: float = Field(..., ge=40, le=240, description="Tempo en BPM")
+    danceability: float = Field(..., ge=0.0, le=1.0, description="Bailabilidad (0.0 a 1.0)")
+    energy: float = Field(..., ge=0.0, le=1.0, description="Energía (0.0 a 1.0)")
+    loudness: float = Field(..., ge=-60.0, le=0.0, description="Sonoridad en dB")
+    instrumentalness: float = Field(0.0, ge=0.0, le=1.0, description="Instrumentalidad (0.0 a 1.0)")
+    explicit: int = Field(0, ge=0, le=1, description="Letra explícita (0 o 1)")
 
 # Manejador amigable de errores de validación sin mostrar errores feos de Python
 @app.exception_handler(RequestValidationError)
@@ -104,64 +193,114 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
-# Endpoint de predicción y segmentación interactiva
+# Endpoint de inferencia directa para el simulador
 @app.post("/api/predecir")
 async def predecir(datos: PredictionInput):
-    if not modelo_arbol or not modelo_kmeans or not scaler:
-        raise HTTPException(status_code=500, detail="Los modelos no están inicializados.")
-    
-    # Vector de características con nombres de columnas esperados
-    X_raw = pd.DataFrame([{
-        'tempo': datos.tempo,
-        'danceability': datos.danceability,
-        'energy': datos.energy,
-        'loudness': datos.loudness,
-        'instrumentalness': datos.instrumentalness,
-        'explicit': datos.explicit
-    }])
-    
-    # 1. Escalado con StandardScaler
-    X_scaled = scaler.transform(X_raw)
-    
-    # 2. Inferencia con Árbol de Decisión (Clasificación de Hit)
-    pred_hit = int(modelo_arbol.predict(X_raw)[0])
-    probabilidades = modelo_arbol.predict_proba(X_raw)[0]
-    prob_hit = float(probabilidades[1]) if len(probabilidades) > 1 else float(pred_hit)
-    
-    # 3. Inferencia con K-Means (Segmentación de Cluster)
-    cluster_id = int(modelo_kmeans.predict(X_scaled)[0])
-    cluster_info = CLUSTER_PROFILES.get(cluster_id, {
-        "nombre": f"Cluster {cluster_id}",
-        "descripcion": "Perfil acústico estándar.",
-        "audiencia": "Audiencia general."
-    })
-    
-    # 4. Motor de Recomendación con Reglas Apriori
-    recomendaciones = []
-    # Reglas específicas por atributos
-    if datos.tempo > 130 and datos.energy > 0.65:
-        recomendaciones.append("Fuerte afinidad detectada para playlists de Cardio/Entrenamiento (Lift > 3.0 en EDM y Rock).")
-    if datos.danceability > 0.65 and datos.genre in ['Pop', 'Reggaeton', 'R&B']:
-        recomendaciones.append("Alta probabilidad de engagement en mercados hispanos y norteamericanos con pauta en discotecas y streaming social.")
-    if datos.loudness > -15.0:
-        recomendaciones.append("Producción moderna con compresión comercial radial óptima.")
-        
-    if not recomendaciones:
-        # Recomendación por defecto de las reglas minadas
-        recomendaciones.append("Canción con perfil equilibrado, ideal para inclusión en listas de descubrimiento semanal y playlists temáticas de descanso.")
-        
+    return ejecutar_inferencia(
+        tempo=datos.tempo,
+        danceability=datos.danceability,
+        energy=datos.energy,
+        loudness=datos.loudness,
+        instrumentalness=datos.instrumentalness,
+        explicit=datos.explicit,
+        genre=datos.genre or "Pop",
+        country=datos.country or "Chile"
+    )
+
+# ==========================================
+# ENDPOINTS CRUD: PORTAFOLIO DE CANCIONES (SQLite)
+# ==========================================
+
+@app.get("/api/canciones")
+async def api_listar_canciones(
+    q: Optional[str] = Query(None, description="Búsqueda por título o artista"),
+    hit: Optional[int] = Query(None, description="Filtrar por hit (1) o nicho (0)"),
+    genre: Optional[str] = Query(None, description="Filtrar por género")
+):
+    """Consulta la lista de canciones evaluadas en base de datos con filtros opcionales."""
+    canciones = listar_canciones(filtro_q=q, filtro_hit=hit, filtro_genero=genre)
     return {
         "exito": True,
-        "es_hit": bool(pred_hit == 1),
-        "probabilidad_hit": round(prob_hit * 100, 1),
-        "cluster_id": cluster_id,
-        "cluster_nombre": cluster_info["nombre"],
-        "cluster_descripcion": cluster_info["descripcion"],
-        "cluster_audiencia": cluster_info["audiencia"],
-        "recomendaciones": recomendaciones
+        "total": len(canciones),
+        "canciones": canciones
     }
 
-# Endpoint para consultar las reglas Apriori descubiertas
+@app.get("/api/canciones/{cancion_id}")
+async def api_obtener_cancion(cancion_id: int):
+    """Obtiene el detalle y diagnóstico ML de una canción por su ID."""
+    cancion = obtener_cancion(cancion_id)
+    if not cancion:
+        raise HTTPException(status_code=404, detail=f"No se encontró la canción con ID {cancion_id}")
+    return {
+        "exito": True,
+        "cancion": cancion
+    }
+
+@app.post("/api/canciones")
+async def api_crear_cancion(datos: CancionCRUDInput):
+    """
+    Crea una nueva canción en el portafolio:
+    1. Ejecuta la inferencia de ML (Árbol + K-Means + Apriori).
+    2. Persiste la canción y sus resultados predictivos en SQLite.
+    """
+    ml_res = ejecutar_inferencia(
+        tempo=datos.tempo,
+        danceability=datos.danceability,
+        energy=datos.energy,
+        loudness=datos.loudness,
+        instrumentalness=datos.instrumentalness,
+        explicit=datos.explicit,
+        genre=datos.genre,
+        country=datos.country
+    )
+    nueva = crear_cancion(datos.model_dump(), ml_res)
+    return {
+        "exito": True,
+        "mensaje": f"Canción '{nueva['track_name']}' registrada y evaluada con éxito.",
+        "cancion": nueva
+    }
+
+@app.put("/api/canciones/{cancion_id}")
+async def api_actualizar_cancion(cancion_id: int, datos: CancionCRUDInput):
+    """
+    Actualiza los atributos de una canción y recalcula sus modelos predictivos.
+    """
+    existente = obtener_cancion(cancion_id)
+    if not existente:
+        raise HTTPException(status_code=404, detail=f"No se encontró la canción con ID {cancion_id}")
+    
+    ml_res = ejecutar_inferencia(
+        tempo=datos.tempo,
+        danceability=datos.danceability,
+        energy=datos.energy,
+        loudness=datos.loudness,
+        instrumentalness=datos.instrumentalness,
+        explicit=datos.explicit,
+        genre=datos.genre,
+        country=datos.country
+    )
+    actualizada = actualizar_cancion(cancion_id, datos.model_dump(), ml_res)
+    return {
+        "exito": True,
+        "mensaje": f"Canción '{actualizada['track_name']}' actualizada y re-evaluada con éxito.",
+        "cancion": actualizada
+    }
+
+@app.delete("/api/canciones/{cancion_id}")
+async def api_eliminar_cancion(cancion_id: int):
+    """Elimina una canción del portafolio."""
+    eliminada = eliminar_cancion(cancion_id)
+    if not eliminada:
+        raise HTTPException(status_code=404, detail=f"No se encontró la canción con ID {cancion_id}")
+    return {
+        "exito": True,
+        "mensaje": f"Canción con ID {cancion_id} eliminada correctamente."
+    }
+
+# ==========================================
+# ENDPOINTS METADATOS Y REGLAS
+# ==========================================
+
 @app.get("/api/reglas")
 async def obtener_reglas():
     return {
@@ -169,7 +308,6 @@ async def obtener_reglas():
         "reglas": reglas_apriori
     }
 
-# Endpoint de estadísticas del dataset
 @app.get("/api/estadisticas")
 async def obtener_estadisticas():
     return {
