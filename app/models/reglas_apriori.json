@@ -1,0 +1,128 @@
+[
+  {
+    "antecedentes": [
+      "Alta_Popularidad"
+    ],
+    "consecuentes": [
+      "Alto_Stream",
+      "Gen_Pop"
+    ],
+    "soporte": 0.0121,
+    "confianza": 0.0669,
+    "lift": 3.3971
+  },
+  {
+    "antecedentes": [
+      "Alto_Stream",
+      "Gen_Pop"
+    ],
+    "consecuentes": [
+      "Alta_Popularidad"
+    ],
+    "soporte": 0.0121,
+    "confianza": 0.6133,
+    "lift": 3.3971
+  },
+  {
+    "antecedentes": [
+      "Gen_R&B",
+      "Alto_Stream"
+    ],
+    "consecuentes": [
+      "Alta_Popularidad"
+    ],
+    "soporte": 0.0123,
+    "confianza": 0.6003,
+    "lift": 3.3255
+  },
+  {
+    "antecedentes": [
+      "Alta_Popularidad"
+    ],
+    "consecuentes": [
+      "Gen_R&B",
+      "Alto_Stream"
+    ],
+    "soporte": 0.0123,
+    "confianza": 0.0682,
+    "lift": 3.3255
+  },
+  {
+    "antecedentes": [
+      "BPM_Alto",
+      "Alta_Popularidad"
+    ],
+    "consecuentes": [
+      "Alta_Bailabilidad",
+      "Alto_Stream"
+    ],
+    "soporte": 0.0183,
+    "confianza": 0.2396,
+    "lift": 3.3084
+  },
+  {
+    "antecedentes": [
+      "Alta_Bailabilidad",
+      "Alto_Stream"
+    ],
+    "consecuentes": [
+      "BPM_Alto",
+      "Alta_Popularidad"
+    ],
+    "soporte": 0.0183,
+    "confianza": 0.2527,
+    "lift": 3.3084
+  },
+  {
+    "antecedentes": [
+      "Alto_Stream"
+    ],
+    "consecuentes": [
+      "BPM_Alto",
+      "Alta_Popularidad",
+      "Alta_Bailabilidad"
+    ],
+    "soporte": 0.0183,
+    "confianza": 0.077,
+    "lift": 3.307
+  },
+  {
+    "antecedentes": [
+      "BPM_Alto",
+      "Alta_Popularidad",
+      "Alta_Bailabilidad"
+    ],
+    "consecuentes": [
+      "Alto_Stream"
+    ],
+    "soporte": 0.0183,
+    "confianza": 0.7859,
+    "lift": 3.307
+  },
+  {
+    "antecedentes": [
+      "Alto_Stream"
+    ],
+    "consecuentes": [
+      "Alta_Energia",
+      "BPM_Alto",
+      "Alta_Popularidad"
+    ],
+    "soporte": 0.0171,
+    "confianza": 0.0721,
+    "lift": 3.2977
+  },
+  {
+    "antecedentes": [
+      "Alta_Energia",
+      "BPM_Alto",
+      "Alta_Popularidad"
+    ],
+    "consecuentes": [
+      "Alto_Stream"
+    ],
+    "soporte": 0.0171,
+    "confianza": 0.7836,
+    "lift": 3.2977
+  }
+]
