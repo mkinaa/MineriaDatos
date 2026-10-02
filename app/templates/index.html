@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundData Analytics - Minería de Datos & Machine Learning</title>
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons CDN -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font Inter -->
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -59,16 +59,16 @@
 </head>
 <body class="bg-black text-white font-sans antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-spotify-green selection:text-black">
 
-    <!-- Notification Toast -->
+    
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-out flex items-center gap-3 bg-spotify-green text-black px-5 py-3 rounded-full font-bold shadow-2xl">
         <i class="fa-solid fa-circle-check text-xl"></i>
         <span id="toast-message">Operación realizada con éxito</span>
     </div>
 
-    <!-- Sidebar Navigation -->
+    
     <aside class="w-full md:w-64 bg-spotify-dark flex-shrink-0 flex flex-col justify-between p-4 border-r border-zinc-800">
         <div>
-            <!-- App Logo -->
+            
             <div class="flex items-center gap-3 px-3 py-4 mb-4">
                 <div class="w-10 h-10 rounded-full bg-spotify-green flex items-center justify-center text-black text-2xl font-black shadow-lg shadow-spotify-green/30">
                     <i class="fa-solid fa-chart-line"></i>
@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <!-- Active Dataset Status Banner -->
+            
             <div class="mb-5 p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <span class="relative flex h-3 w-3">
@@ -96,7 +96,7 @@
                 </button>
             </div>
 
-            <!-- Navigation Buttons -->
+            
             <nav class="space-y-1">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-spotify-green/10 text-spotify-green">
                     <i class="fa-solid fa-chart-pie text-lg w-5"></i>
@@ -117,7 +117,7 @@
             </nav>
         </div>
 
-        <!-- Sidebar Summary -->
+        
         <div class="pt-4 border-t border-zinc-800 mt-6 text-xs text-zinc-400 space-y-2">
             <div class="flex justify-between">
                 <span>Total Registros:</span>
@@ -134,10 +134,10 @@
         </div>
     </aside>
 
-    <!-- Main Content Body -->
+    
     <main class="flex-1 flex flex-col min-w-0 bg-black overflow-y-auto">
 
-        <!-- Header Bar -->
+        
         <header class="sticky top-0 z-30 bg-black/80 backdrop-blur-md px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h2 id="header-title" class="text-2xl font-black text-white tracking-tight">Análisis Global de Oyentes y Reproducciones</h2>
@@ -154,10 +154,10 @@
 
         <div class="p-6 space-y-6 max-w-7xl w-full mx-auto">
 
-            <!-- TAB 1: DASHBOARD DE ANALISIS DE OYENTES -->
+            
             <div id="tab-dashboard" class="tab-content space-y-6">
 
-                <!-- High Level Stream Metrics KPI Grid -->
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-spotify-card p-5 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
                         <div class="flex justify-between items-start">
@@ -221,7 +221,7 @@
                     </div>
                 </div>
 
-                <!-- Genre Streams Bar Chart and Country Share Chart -->
+                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-4">
@@ -253,7 +253,7 @@
                     </div>
                 </div>
 
-                <!-- Detailed Genre Stream Breakdown Grid Cards -->
+                
                 <div>
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-extrabold text-white">Segmentación Detallada de Oyentes por Géneros</h3>
@@ -261,16 +261,16 @@
                     </div>
 
                     <div id="genre-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- JS injects genre stream cards here -->
+                        
                     </div>
                 </div>
 
             </div>
 
-            <!-- TAB 2: SEGMENTACIÓN POR ATRIBUTO INDIVIDUAL -->
+            
             <div id="tab-segmentation" class="tab-content hidden space-y-6">
 
-                <!-- Attribute Selector Bar -->
+                
                 <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                         <div>
@@ -280,7 +280,7 @@
                         </div>
                     </div>
 
-                    <!-- Attribute Pills Navigation -->
+                    
                     <div class="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/80">
                         <button onclick="selectIndividualAttribute('genre')" id="attr-btn-genre" class="attr-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-spotify-green text-black shadow-md shadow-spotify-green/20">
                             <i class="fa-solid fa-guitar mr-1.5"></i> Género
@@ -306,7 +306,7 @@
                     </div>
                 </div>
 
-                <!-- Attribute Chart and Table Analysis -->
+                
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-7 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
                         <div>
@@ -343,10 +343,10 @@
                 </div>
             </div>
 
-            <!-- TAB 3: SIMULADOR PREDICTIVO MACHINE LEARNING -->
+            
             <div id="tab-prediction" class="tab-content hidden space-y-6">
 
-                <!-- Header Banner -->
+                
                 <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
                     <span class="px-3 py-1 bg-spotify-green/20 text-spotify-green text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Machine Learning en Tiempo Real</span>
                     <h3 class="text-2xl font-black text-white">Simulador de Éxito y Segmentación de Canción</h3>
@@ -354,13 +354,13 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- Form Input Column -->
+                    
                     <div class="lg:col-span-5 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 space-y-4">
                         <h4 class="font-extrabold text-white text-base flex items-center gap-2">
                             <i class="fa-solid fa-sliders text-spotify-green"></i> Atributos Acústicos
                         </h4>
 
-                        <!-- Track and Artist Names for Portfolio -->
+                        
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs text-zinc-400 font-semibold mb-1">Título del Track:</label>
@@ -372,7 +372,7 @@
                             </div>
                         </div>
 
-                        <!-- Tempo Slider -->
+                        
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <label class="text-zinc-300 font-semibold">Tempo (Ritmo - BPM):</label>
@@ -385,7 +385,7 @@
                             </div>
                         </div>
 
-                        <!-- Energy Slider -->
+                        
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <label class="text-zinc-300 font-semibold">Energía Acústica:</label>
@@ -394,7 +394,7 @@
                             <input type="range" id="input-energy" min="0.0" max="1.0" value="0.70" step="0.01" oninput="document.getElementById('val-energy').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
                         </div>
 
-                        <!-- Danceability Slider -->
+                        
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <label class="text-zinc-300 font-semibold">Bailabilidad:</label>
@@ -403,7 +403,7 @@
                             <input type="range" id="input-dance" min="0.0" max="1.0" value="0.65" step="0.01" oninput="document.getElementById('val-dance').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
                         </div>
 
-                        <!-- Loudness Slider -->
+                        
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <label class="text-zinc-300 font-semibold">Sonoridad (Volumen dB):</label>
@@ -412,7 +412,7 @@
                             <input type="range" id="input-loud" min="-50" max="0" value="-10" step="0.5" oninput="document.getElementById('val-loud').innerText = this.value + ' dB'" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
                         </div>
 
-                        <!-- Instrumentalness Slider -->
+                        
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <label class="text-zinc-300 font-semibold">Nivel Instrumental:</label>
@@ -421,7 +421,7 @@
                             <input type="range" id="input-inst" min="0.0" max="1.0" value="0.10" step="0.01" oninput="document.getElementById('val-inst').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
                         </div>
 
-                        <!-- Genre and Country Dropdowns -->
+                        
                         <div class="grid grid-cols-2 gap-3 pt-1">
                             <div>
                                 <label class="block text-xs text-zinc-400 font-semibold mb-1">Género Principal:</label>
@@ -454,13 +454,13 @@
                             </div>
                         </div>
 
-                        <!-- Explicit Checkbox -->
+                        
                         <div class="flex items-center gap-2 pt-1">
                             <input type="checkbox" id="input-explicit" class="accent-spotify-green w-4 h-4 rounded cursor-pointer">
                             <label for="input-explicit" class="text-xs text-zinc-300 cursor-pointer">Letra con contenido explícito</label>
                         </div>
 
-                        <!-- Action Buttons -->
+                        
                         <div class="pt-2 space-y-2">
                             <button onclick="ejecutarPrediccion()" id="btn-predecir" class="w-full bg-spotify-green hover:bg-spotify-hover text-black font-extrabold py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg shadow-spotify-green/20">
                                 <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -473,10 +473,10 @@
                         </div>
                     </div>
 
-                    <!-- Results Column -->
+                    
                     <div class="lg:col-span-7 space-y-4">
                         
-                        <!-- Prediction Card: Decision Tree Result -->
+                        
                         <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
@@ -500,7 +500,7 @@
                             </div>
                         </div>
 
-                        <!-- Cluster Card: K-Means Result -->
+                        
                         <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
@@ -522,7 +522,7 @@
                             </div>
                         </div>
 
-                        <!-- Recommendations Card: Apriori Rules -->
+                        
                         <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
                             <div class="flex justify-between items-center mb-3">
                                 <div>
@@ -545,10 +545,10 @@
 
             </div>
 
-            <!-- TAB 4: PORTAFOLIO DE CANCIONES Y CRUD SQLITE -->
+            
             <div id="tab-portfolio" class="tab-content hidden space-y-6">
 
-                <!-- Header Banner -->
+                
                 <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-purple-950/40 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <span class="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Persistencia Relacional SQLite</span>
@@ -561,7 +561,7 @@
                     </button>
                 </div>
 
-                <!-- CRUD Summary Metrics -->
+                
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div class="bg-spotify-card p-4 rounded-xl border border-zinc-800">
                         <p class="text-[11px] text-zinc-400 font-semibold uppercase">Total Canciones</p>
@@ -581,7 +581,7 @@
                     </div>
                 </div>
 
-                <!-- Filter and Search Controls -->
+                
                 <div class="bg-spotify-card p-4 rounded-2xl border border-zinc-800/80 flex flex-col md:flex-row gap-3 justify-between items-center">
                     <div class="relative w-full md:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-zinc-500 text-xs"></i>
@@ -613,7 +613,7 @@
                     </div>
                 </div>
 
-                <!-- CRUD Data Table -->
+                
                 <div class="bg-spotify-card rounded-2xl border border-zinc-800/80 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
@@ -645,7 +645,7 @@
 
     </main>
 
-    <!-- MODAL: CREAR / EDITAR CANCIÓN EN CRUD -->
+    
     <div id="modal-crud" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-spotify-card border border-zinc-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -703,7 +703,7 @@
                     </div>
                 </div>
 
-                <!-- Sliders Acústicos -->
+                
                 <div class="space-y-3 pt-2 border-t border-zinc-800">
                     <div>
                         <div class="flex justify-between text-xs mb-1">
@@ -764,11 +764,8 @@
         </div>
     </div>
 
-    <!-- SCRIPTS DE LA APLICACIÓN -->
+    
     <script>
-        // ==========================================
-        // 1. DATASET Y CARGA DE METRICAS GLOBALES
-        // ==========================================
         let songDataset = [];
         let genreChartInstance = null;
         let countryChartInstance = null;
@@ -813,13 +810,9 @@
             showToast('Dataset recargado con éxito');
         }
 
-        // ==========================================
-        // 2. DASHBOARD Y GRAFICOS CHART.JS
-        // ==========================================
         function updateApp() {
             if (!songDataset.length) songDataset = generateRealisticDataset();
 
-            // KPIs
             const totalStreams = songDataset.reduce((sum, item) => sum + item.stream_count, 0);
             const avgPop = Math.round(songDataset.reduce((sum, item) => sum + item.popularity, 0) / songDataset.length);
             const explicitCount = songDataset.filter(item => item.explicit === 1).length;
@@ -830,7 +823,6 @@
             document.getElementById('kpi-avg-popularity').innerText = `${avgPop} / 100`;
             document.getElementById('kpi-explicit-ratio').innerText = `${explicitRatio}% contenido explícito`;
 
-            // Streams por género
             const streamsByGenre = {};
             songDataset.forEach(s => {
                 streamsByGenre[s.genre] = (streamsByGenre[s.genre] || 0) + s.stream_count;
@@ -840,7 +832,6 @@
             document.getElementById('kpi-top-streamed-genre').innerText = topGenre;
             document.getElementById('kpi-genre-stream-share').innerText = `${topGenrePct}% de oyentes totales`;
 
-            // Streams por país
             const streamsByCountry = {};
             songDataset.forEach(s => {
                 streamsByCountry[s.country] = (streamsByCountry[s.country] || 0) + s.stream_count;
@@ -1008,9 +999,6 @@
             `).join('');
         }
 
-        // ==========================================
-        // 3. NAVEGACION ENTRE PESTAÑAS
-        // ==========================================
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1048,9 +1036,6 @@
             }
         }
 
-        // ==========================================
-        // 4. SIMULADOR MACHINE LEARNING (POST /api/predecir)
-        // ==========================================
         let ultimaPrediccionML = null;
 
         async function ejecutarPrediccion() {
@@ -1081,7 +1066,6 @@
                 if (data.exito) {
                     ultimaPrediccionML = data;
 
-                    // Árbol de Decisión
                     const hitBadge = document.getElementById('res-hit-badge');
                     const hitTitle = document.getElementById('res-hit-title');
                     const hitProb = document.getElementById('res-hit-prob');
@@ -1097,13 +1081,11 @@
                     }
                     hitProb.innerText = `${data.probabilidad_hit}%`;
                     
-                    // K-Means
                     document.getElementById('res-cluster-badge').innerText = `Segmento ${data.cluster_id}`;
                     document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
                     document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
                     document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
                     
-                    // Apriori
                     const recomList = document.getElementById('res-recom-list');
                     recomList.innerHTML = '';
                     data.recomendaciones.forEach(rec => {
@@ -1169,9 +1151,6 @@
             }
         }
 
-        // ==========================================
-        // 5. MODULO CRUD CON SQLITE (/api/canciones)
-        // ==========================================
         async function cargarCancionesCRUD() {
             const genre = document.getElementById('crud-filter-genre').value;
             const hit = document.getElementById('crud-filter-hit').value;
@@ -1208,7 +1187,6 @@
         function renderizarTablaCRUD(canciones) {
             const tbody = document.getElementById('crud-table-body');
             
-            // Actualizar métricas del resumen
             document.getElementById('crud-stat-total').innerText = canciones.length;
             const hits = canciones.filter(c => c.es_hit).length;
             document.getElementById('crud-stat-hits').innerText = hits;
@@ -1263,9 +1241,6 @@
             `).join('');
         }
 
-        // ==========================================
-        // 6. MODAL INTERACTIVO CREAR / EDITAR
-        // ==========================================
         function abrirModalCrearCancion() {
             document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-music text-spotify-green"></i> <span>Registrar Nueva Canción</span>';
             document.getElementById('modal-cancion-id').value = '';
@@ -1340,14 +1315,12 @@
             try {
                 let response;
                 if (id) {
-                    // Actualización (PUT)
                     response = await fetch(`/api/canciones/${id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
                 } else {
-                    // Creación (POST)
                     response = await fetch('/api/canciones', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1392,9 +1365,6 @@
             }
         }
 
-        // ==========================================
-        // 7. EXPORTACION Y UTILIDADES
-        // ==========================================
         function exportDatasetSummary() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(songDataset, null, 2));
             const downloadAnchor = document.createElement('a');
@@ -1415,7 +1385,6 @@
             }, 3000);
         }
 
-        // Inicialización al cargar la página
         window.addEventListener('DOMContentLoaded', () => {
             reloadDefaultDataset();
         });
