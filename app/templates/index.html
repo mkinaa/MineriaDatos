@@ -5,9 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundPulse Analytics - Segmentación Global por Dataset Spotify</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+        // Lógica de consumo de API Machine Learning (POST /api/predecir)
+        async function ejecutarPrediccion() {
+            const btn = document.getElementById('btn-predecir');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
+            
+            const payload = {
+                tempo: parseFloat(document.getElementById('input-tempo').value),
+                danceability: parseFloat(document.getElementById('input-dance').value),
+                energy: parseFloat(document.getElementById('input-energy').value),
+                loudness: parseFloat(document.getElementById('input-loud').value),
+                instrumentalness: parseFloat(document.getElementById('input-inst').value),
+                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
+                genre: document.getElementById('input-genre').value,
+                country: document.getElementById('input-country').value
+            };
+
+            try {
+                const response = await fetch('/api/predecir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.exito) {
+                    // Actualizar Árbol de Decisión
+                    const hitBadge = document.getElementById('res-hit-badge');
+                    const hitTitle = document.getElementById('res-hit-title');
+                    const hitProb = document.getElementById('res-hit-prob');
+                    
+                    if (data.es_hit) {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
+                        hitBadge.innerText = 'POTENCIAL HIT';
+                        hitTitle.innerText = 'Alta Repercusión Comercial';
+                    } else {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
+                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
+                    }
+                    hitProb.innerText = `${data.probabilidad_hit}%`;
+                    
+                    // Actualizar K-Means
+                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
+                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
+                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
+                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
+                    
+                    // Actualizar Apriori
+                    const recomList = document.getElementById('res-recom-list');
+                    recomList.innerHTML = '';
+                    data.recomendaciones.forEach(rec => {
+                        const li = document.createElement('li');
+                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
+                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
+                        recomList.appendChild(li);
+                    });
+                    
+                    showToast('¡Predicción y segmentación completadas!');
+                } else {
+                    showToast('Error en la predicción');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión con la API');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
+            }
+        }
+
+    </script>
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+        // Lógica de consumo de API Machine Learning (POST /api/predecir)
+        async function ejecutarPrediccion() {
+            const btn = document.getElementById('btn-predecir');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
+            
+            const payload = {
+                tempo: parseFloat(document.getElementById('input-tempo').value),
+                danceability: parseFloat(document.getElementById('input-dance').value),
+                energy: parseFloat(document.getElementById('input-energy').value),
+                loudness: parseFloat(document.getElementById('input-loud').value),
+                instrumentalness: parseFloat(document.getElementById('input-inst').value),
+                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
+                genre: document.getElementById('input-genre').value,
+                country: document.getElementById('input-country').value
+            };
+
+            try {
+                const response = await fetch('/api/predecir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.exito) {
+                    // Actualizar Árbol de Decisión
+                    const hitBadge = document.getElementById('res-hit-badge');
+                    const hitTitle = document.getElementById('res-hit-title');
+                    const hitProb = document.getElementById('res-hit-prob');
+                    
+                    if (data.es_hit) {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
+                        hitBadge.innerText = 'POTENCIAL HIT';
+                        hitTitle.innerText = 'Alta Repercusión Comercial';
+                    } else {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
+                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
+                    }
+                    hitProb.innerText = `${data.probabilidad_hit}%`;
+                    
+                    // Actualizar K-Means
+                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
+                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
+                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
+                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
+                    
+                    // Actualizar Apriori
+                    const recomList = document.getElementById('res-recom-list');
+                    recomList.innerHTML = '';
+                    data.recomendaciones.forEach(rec => {
+                        const li = document.createElement('li');
+                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
+                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
+                        recomList.appendChild(li);
+                    });
+                    
+                    showToast('¡Predicción y segmentación completadas!');
+                } else {
+                    showToast('Error en la predicción');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión con la API');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
+            }
+        }
+
+    </script>
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Font Inter -->
@@ -34,6 +180,79 @@
                 }
             }
         }
+    
+        // Lógica de consumo de API Machine Learning (POST /api/predecir)
+        async function ejecutarPrediccion() {
+            const btn = document.getElementById('btn-predecir');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
+            
+            const payload = {
+                tempo: parseFloat(document.getElementById('input-tempo').value),
+                danceability: parseFloat(document.getElementById('input-dance').value),
+                energy: parseFloat(document.getElementById('input-energy').value),
+                loudness: parseFloat(document.getElementById('input-loud').value),
+                instrumentalness: parseFloat(document.getElementById('input-inst').value),
+                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
+                genre: document.getElementById('input-genre').value,
+                country: document.getElementById('input-country').value
+            };
+
+            try {
+                const response = await fetch('/api/predecir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.exito) {
+                    // Actualizar Árbol de Decisión
+                    const hitBadge = document.getElementById('res-hit-badge');
+                    const hitTitle = document.getElementById('res-hit-title');
+                    const hitProb = document.getElementById('res-hit-prob');
+                    
+                    if (data.es_hit) {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
+                        hitBadge.innerText = 'POTENCIAL HIT';
+                        hitTitle.innerText = 'Alta Repercusión Comercial';
+                    } else {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
+                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
+                    }
+                    hitProb.innerText = `${data.probabilidad_hit}%`;
+                    
+                    // Actualizar K-Means
+                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
+                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
+                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
+                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
+                    
+                    // Actualizar Apriori
+                    const recomList = document.getElementById('res-recom-list');
+                    recomList.innerHTML = '';
+                    data.recomendaciones.forEach(rec => {
+                        const li = document.createElement('li');
+                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
+                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
+                        recomList.appendChild(li);
+                    });
+                    
+                    showToast('¡Predicción y segmentación completadas!');
+                } else {
+                    showToast('Error en la predicción');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión con la API');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
+            }
+        }
+
     </script>
     <style>
         ::-webkit-scrollbar {
@@ -105,6 +324,10 @@
                 <button onclick="switchTab('segmentation')" id="nav-segmentation" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all">
                     <i class="fa-solid fa-sliders text-lg w-5"></i>
                     <span>Segmentación por Atributo</span>
+                </button>
+                <button onclick="switchTab('prediction')" id="nav-prediction" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles text-lg w-5"></i>
+                    <span>Simulador ML (Predicción)</span>
                 </button>
             </nav>
         </div>
@@ -257,6 +480,191 @@
 
                     <div id="genre-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- JS injects genre stream cards here -->
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- TAB 3: SIMULADOR PREDICTIVO MACHINE LEARNING (Fases 4A, 4B, 4C) -->
+            <div id="tab-prediction" class="tab-content hidden space-y-6">
+
+                <!-- Header Banner -->
+                <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-spotify-green/20 p-6 rounded-2xl border border-zinc-800">
+                    <span class="px-3 py-1 bg-spotify-green/20 text-spotify-green text-xs font-bold rounded-full uppercase tracking-wider mb-2 inline-block">Machine Learning en Tiempo Real</span>
+                    <h3 class="text-2xl font-black text-white">Simulador de Éxito y Segmentación de Canción</h3>
+                    <p class="text-xs text-zinc-300 mt-1">Ajusta los atributos acústicos de una canción para predecir si será un Hit (Árbol de Decisión), clasificar su cluster de oyentes (K-Means) y obtener recomendaciones de mercado (Apriori).</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Form Input Column -->
+                    <div class="lg:col-span-5 bg-spotify-card p-6 rounded-2xl border border-zinc-800/80 space-y-4">
+                        <h4 class="font-extrabold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-spotify-green"></i> Atributos Acústicos
+                        </h4>
+
+                        <!-- Tempo Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Tempo (BPM):</label>
+                                <span id="val-tempo" class="text-spotify-green font-bold">128 BPM</span>
+                            </div>
+                            <input type="range" id="input-tempo" min="60" max="200" value="128" step="1" oninput="document.getElementById('val-tempo').innerText = this.value + ' BPM'" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-zinc-500 mt-0.5">
+                                <span>Lento (60)</span>
+                                <span>Cardio / Rápido (200)</span>
+                            </div>
+                        </div>
+
+                        <!-- Energy Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Energía (Energy):</label>
+                                <span id="val-energy" class="text-spotify-green font-bold">0.70</span>
+                            </div>
+                            <input type="range" id="input-energy" min="0.0" max="1.0" value="0.70" step="0.01" oninput="document.getElementById('val-energy').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Danceability Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Bailabilidad (Danceability):</label>
+                                <span id="val-dance" class="text-spotify-green font-bold">0.65</span>
+                            </div>
+                            <input type="range" id="input-dance" min="0.0" max="1.0" value="0.65" step="0.01" oninput="document.getElementById('val-dance').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Loudness Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Sonoridad (Loudness dB):</label>
+                                <span id="val-loud" class="text-spotify-green font-bold">-10 dB</span>
+                            </div>
+                            <input type="range" id="input-loud" min="-50" max="0" value="-10" step="0.5" oninput="document.getElementById('val-loud').innerText = this.value + ' dB'" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Instrumentalness Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-zinc-300 font-semibold">Instrumentalidad:</label>
+                                <span id="val-inst" class="text-spotify-green font-bold">0.10</span>
+                            </div>
+                            <input type="range" id="input-inst" min="0.0" max="1.0" value="0.10" step="0.01" oninput="document.getElementById('val-inst').innerText = Number(this.value).toFixed(2)" class="w-full accent-spotify-green bg-zinc-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Genre and Country Dropdowns -->
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div>
+                                <label class="block text-xs text-zinc-400 font-semibold mb-1">Género Principal:</label>
+                                <select id="input-genre" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                                    <option value="Pop" selected>Pop</option>
+                                    <option value="Rock">Rock</option>
+                                    <option value="Reggaeton">Reggaeton</option>
+                                    <option value="EDM">EDM</option>
+                                    <option value="Hip-Hop">Hip-Hop</option>
+                                    <option value="Metal">Metal</option>
+                                    <option value="R&B">R&B</option>
+                                    <option value="Indie">Indie</option>
+                                    <option value="Folk">Folk</option>
+                                    <option value="Jazz">Jazz</option>
+                                    <option value="Classical">Classical</option>
+                                    <option value="Country">Country</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-zinc-400 font-semibold mb-1">Mercado Objetivo:</label>
+                                <select id="input-country" class="w-full bg-zinc-900 border border-zinc-700 text-xs text-white rounded-xl p-2.5 focus:border-spotify-green focus:outline-none">
+                                    <option value="Chile" selected>Chile</option>
+                                    <option value="Mexico">México</option>
+                                    <option value="United States">Estados Unidos</option>
+                                    <option value="Brazil">Brasil</option>
+                                    <option value="United Kingdom">Reino Unido</option>
+                                    <option value="Germany">Alemania</option>
+                                    <option value="Japan">Japón</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Explicit Checkbox -->
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" id="input-explicit" class="accent-spotify-green w-4 h-4 rounded cursor-pointer">
+                            <label for="input-explicit" class="text-xs text-zinc-300 cursor-pointer">Letra con contenido explícito (Explicit)</label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button onclick="ejecutarPrediccion()" id="btn-predecir" class="w-full mt-4 bg-spotify-green hover:bg-spotify-hover text-black font-extrabold py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg shadow-spotify-green/20">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Calcular Predicción con ML</span>
+                        </button>
+                    </div>
+
+                    <!-- Results Column -->
+                    <div class="lg:col-span-7 space-y-4">
+                        
+                        <!-- Prediction Card: Decision Tree Result -->
+                        <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Modelo 1: Árbol de Decisión</span>
+                                    <h4 class="text-xl font-black text-white mt-0.5">Diagnóstico de Éxito Comercial</h4>
+                                </div>
+                                <div id="res-hit-badge" class="px-3 py-1 rounded-full text-xs font-black bg-zinc-800 text-zinc-400">
+                                    Esperando análisis...
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                <div class="p-4 bg-zinc-900/80 rounded-xl border border-zinc-800">
+                                    <p class="text-xs text-zinc-400 font-medium">Predicción:</p>
+                                    <h5 id="res-hit-title" class="text-lg font-black text-white mt-1">-</h5>
+                                </div>
+                                <div class="p-4 bg-zinc-900/80 rounded-xl border border-zinc-800">
+                                    <p class="text-xs text-zinc-400 font-medium">Probabilidad de Éxito:</p>
+                                    <h5 id="res-hit-prob" class="text-lg font-black text-spotify-green mt-1">0%</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cluster Card: K-Means Result -->
+                        <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400">Modelo 2: K-Means Clustering</span>
+                                    <h4 class="text-xl font-black text-white mt-0.5">Segmento de Oyentes Asignado</h4>
+                                </div>
+                                <div id="res-cluster-badge" class="px-3 py-1 rounded-full text-xs font-black bg-purple-500/20 text-purple-400">
+                                    Cluster -
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-zinc-900/80 rounded-xl border border-zinc-800 mt-3 space-y-2">
+                                <h5 id="res-cluster-name" class="text-base font-extrabold text-white">Pendiente de evaluación</h5>
+                                <p id="res-cluster-desc" class="text-xs text-zinc-300">Ajusta los atributos y presiona el botón para clasificar la canción dentro de los 4 perfiles sonoros.</p>
+                                <div class="pt-2 border-t border-zinc-800/80">
+                                    <span class="text-[11px] text-zinc-400 font-semibold">Perfil del Oyente: </span>
+                                    <span id="res-cluster-audience" class="text-xs text-spotify-green font-medium">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations Card: Apriori Rules -->
+                        <div class="bg-spotify-card p-6 rounded-2xl border border-zinc-800/80">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Modelo 3: Reglas de Asociación (Apriori)</span>
+                                    <h4 class="text-xl font-black text-white mt-0.5">Recomendaciones Estratégicas</h4>
+                                </div>
+                                <i class="fa-solid fa-lightbulb text-amber-400 text-lg"></i>
+                            </div>
+                            
+                            <ul id="res-recom-list" class="space-y-2 text-xs text-zinc-300">
+                                <li class="p-3 bg-zinc-900/80 rounded-xl border border-zinc-800 flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-info text-zinc-500 mt-0.5"></i>
+                                    <span>Aquí se mostrarán las reglas de afinidad minadas para optimizar la promoción de la canción.</span>
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
                 </div>
 
@@ -781,11 +1189,13 @@
             // Headers
             const titleMap = {
                 'dashboard': 'Análisis Global de Oyentes (`stream_count`)',
-                'segmentation': 'Segmentación por Atributo Individual'
+                'segmentation': 'Segmentación por Atributo Individual',
+                'prediction': 'Simulador Machine Learning (Predicción y Segmentación)'
             };
             const subtitleMap = {
                 'dashboard': 'Procesamiento y segmentación cuantitativa de reproducciones basadas en el dataset de Spotify.',
-                'segmentation': 'Analiza qué cantidad de oyentes tiene cada atributo por separado (género, fecha, país, energía, danceability, etc.).'
+                'segmentation': 'Analiza qué cantidad de oyentes tiene cada atributo por separado (género, fecha, país, energía, danceability, etc.).',
+                'prediction': 'Inferencia en tiempo real utilizando los modelos entrenados en Google Colab (Árbol de Decisión, K-Means y Apriori).'
             };
 
             document.getElementById('header-title').innerText = titleMap[tabId];
@@ -811,6 +1221,79 @@
                 toast.classList.add('translate-y-[-150%]');
             }, 3000);
         }
+    
+        // Lógica de consumo de API Machine Learning (POST /api/predecir)
+        async function ejecutarPrediccion() {
+            const btn = document.getElementById('btn-predecir');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Procesando modelos...</span>';
+            
+            const payload = {
+                tempo: parseFloat(document.getElementById('input-tempo').value),
+                danceability: parseFloat(document.getElementById('input-dance').value),
+                energy: parseFloat(document.getElementById('input-energy').value),
+                loudness: parseFloat(document.getElementById('input-loud').value),
+                instrumentalness: parseFloat(document.getElementById('input-inst').value),
+                explicit: document.getElementById('input-explicit').checked ? 1 : 0,
+                genre: document.getElementById('input-genre').value,
+                country: document.getElementById('input-country').value
+            };
+
+            try {
+                const response = await fetch('/api/predecir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.exito) {
+                    // Actualizar Árbol de Decisión
+                    const hitBadge = document.getElementById('res-hit-badge');
+                    const hitTitle = document.getElementById('res-hit-title');
+                    const hitProb = document.getElementById('res-hit-prob');
+                    
+                    if (data.es_hit) {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-spotify-green text-black shadow-md shadow-spotify-green/20';
+                        hitBadge.innerText = 'POTENCIAL HIT';
+                        hitTitle.innerText = 'Alta Repercusión Comercial';
+                    } else {
+                        hitBadge.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                        hitBadge.innerText = 'PERFIL ESTÁNDAR / NICHO';
+                        hitTitle.innerText = 'Rendimiento Moderado de Nicho';
+                    }
+                    hitProb.innerText = `${data.probabilidad_hit}%`;
+                    
+                    // Actualizar K-Means
+                    document.getElementById('res-cluster-badge').innerText = `Cluster ${data.cluster_id}`;
+                    document.getElementById('res-cluster-name').innerText = data.cluster_nombre;
+                    document.getElementById('res-cluster-desc').innerText = data.cluster_descripcion;
+                    document.getElementById('res-cluster-audience').innerText = data.cluster_audiencia;
+                    
+                    // Actualizar Apriori
+                    const recomList = document.getElementById('res-recom-list');
+                    recomList.innerHTML = '';
+                    data.recomendaciones.forEach(rec => {
+                        const li = document.createElement('li');
+                        li.className = 'p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 flex items-start gap-2.5 text-zinc-200';
+                        li.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-spotify-green mt-0.5"></i><span>${rec}</span>`;
+                        recomList.appendChild(li);
+                    });
+                    
+                    showToast('¡Predicción y segmentación completadas!');
+                } else {
+                    showToast('Error en la predicción');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión con la API');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Calcular Predicción con ML</span>';
+            }
+        }
+
     </script>
 </body>
 </html>
