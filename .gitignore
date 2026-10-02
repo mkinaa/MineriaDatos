@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter Checkpoints
+.ipynb_checkpoints/
+
+# Operating System and Office Locks
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+~$*.docx
+~$*.xlsx
+~$*.pptx
+*.tmp
+
+# Visual Studio Code / IDEs
+.vscode/
+.idea/

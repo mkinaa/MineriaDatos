@@ -1,61 +1,105 @@
-# Segmentación de Audiencias Musicales y Predicción de Éxito
-> **Metodología:** CRISP-DM (Fases 1 y 2: Comprensión del Negocio y de los Datos)  
-> **Asignatura:** Minería de Datos (IEI-067)  
-> **Dataset:** `spotify_2015_2025_85k.csv` (85.000 canciones)
+# SoundData Analytics: Segmentación de Audiencias Musicales y Predicción de Éxito
+> **Metodología:** CRISP-DM | **Asignatura:** Minería de Datos (IEI-067) — Santo Tomás  
+> **Dataset Base:** `spotify_2015_2025_85k.csv` (85.000 canciones, 19 atributos, 10 países y 12 géneros)
 
 ---
 
-| Problema Central | Base de Datos | Solución Web |
-| :--- | :--- | :--- |
-| **Incertidumbre en lanzamientos:** Alto riesgo financiero y marketing genérico sin segmentar a los oyentes por contexto o estado anímico. | **85.000 canciones reales (2015-2025):** 19 atributos, 10 mercados globales y 12 géneros balanceados sin valores nulos. | **Aplicación Interactiva:** Web full-stack que clasifica potencial de Hit, perfila el cluster sonoro y entrega recomendaciones accionables. |
+## 👥 Integrantes del Equipo y Distribución de Roles
 
----
-
-## PUNTO 1: Comprensión del Negocio (Business Understanding)
-
-### 1.1 El Problema Real
-* **El cambio de paradigma en el consumo:** En la actualidad, el usuario no consume música únicamente por artista; la escucha está guiada por el **contexto y el ritmo cardíaco (BPM)** (ej: 140–160 BPM para entrenamiento/running, 110–128 BPM para fiesta/club, $<90$ BPM para estudio y relajación).
-* **El dolor de la industria:** Tanto las grandes discográficas como los artistas independientes invierten millones a ciegas en campañas de publicidad masivas y genéricas, sin conocer con exactitud qué mercados geográficos o nichos de oyentes tienen afinidad acústica con sus producciones.
-
-### 1.2 Lo que Resuelve la Minería de Datos
-* **Clustering (`K-Means`):** Segmentación automática de canciones y audiencias en *"Vibras/Moods"* acústicos (ej. *Cluster Cardio/Alta Energía*, *Cluster Mainstream Bailable*, *Cluster Acústico de Estudio*).
-* **Clasificación (`Árbol de Decisión`):** Predicción de probabilidad de éxito comercial (**Hit**: Popularidad $\ge 50$ o alto volumen de reproducciones) antes de incurrir en gastos de marketing.
-* **Reglas de Asociación (`Apriori`):** Descubrimiento de patrones ocultos entre tempo, procedencia geográfica y tipo de sello discográfico (ej. *Si el BPM es rápido y proviene de sello independiente $\Rightarrow$ ¿qué géneros y países aseguran mayor afinidad?*).
-* **Despliegue Web (`FastAPI` + `HTML/Bootstrap/JS`):** Interfaz interactiva donde un productor ingresa los atributos de su pista y el sistema retorna predicción, cluster y recomendaciones en tiempo real.
-
-### 1.3 Metas de Éxito Concretas
-* **Exactitud en Clasificación:** Superar el **70% de Accuracy** en el Árbol de Decisión (`DecisionTreeClassifier`), manteniendo control sobre `max_depth` para evitar sobreajuste (*overfitting*).
-* **Calidad de Segmentación:** Entre **3 y 5 clusters** acústicos claramente diferenciados, respaldados técnicamente por el **Método del Codo** y el **Coeficiente de Silueta**.
-* **Reglas de Negocio Válidas:** Mínimo **3 reglas Apriori** significativas con:
-  * $\text{Soporte} \ge 5\%$
-  * $\text{Confianza} \ge 60\%$
-  * $\text{Lift} > 1.2$
-
----
-
-## PUNTO 2: Comprensión de los Datos (Data Understanding)
-
-### 2.1 Radiografía del Dataset Seleccionado
-* **Archivo fuente:** `spotify_2015_2025_85k.csv` (Kaggle).
-* **Volumen:** **85.000 registros** y **19 columnas** (cumple y supera ampliamente el mínimo de 500 filas y 5 atributos).
-* **Integridad técnica:** **0 valores nulos** ($100\%$ de completitud) con cobertura temporal ininterrumpida de una década (**2015 a 2025**).
-
-### 2.2 Identificación y Rol de Variables
-* **Variable Objetivo (`Class`):** `is_hit` / Éxito Comercial:
-  * `1` = Canción con Popularidad $\ge 50$ o alto volumen de streams.
-  * `0` = Canción estándar / baja repercusión comercial.
-  * *Esta variable será aprendida por el Árbol de Decisión.*
-* **Variables Predictoras (`Meta`):**
-  * **Atributos acústicos:** `tempo` (BPM), `danceability`, `energy`, `loudness`, `instrumentalness`.
-  * **Mercado geográfico:** `country` (10 países globales representados).
-  * **Industria discográfica:** `label` (Major vs. Independent).
-
-### 2.3 Resumen Estadístico y Hallazgos para la Exposición
-
-| Variable | Promedio / Mediana | Rango (Mín - Máx) | Interpretación Analítica para el Negocio |
+| Integrante | Rol / Especialidad | Módulo CRISP-DM | Entregables Clave |
 | :--- | :--- | :--- | :--- |
-| `stream_count` *(Reproducciones)* | Promedio: ~214k<br>Mediana: 2.000 | 1.000 a 20.000.000 | **Ley de Pareto evidente:** Un porcentaje reducido de pistas concentra millones de reproducciones (mega-hits), mientras la gran mayoría atiende a nichos específicos. |
-| `tempo` *(Ritmo en BPM)* | Promedio: 130 BPM<br>Mediana: 130 BPM | 60 a 200 BPM | **Punto de inflexión simétrico:** 130 BPM divide acústicamente la música pausada/relajante de las pistas de entrenamiento, baile y alta energía. |
-| `popularity` *(Índice de Éxito)* | Promedio: 48,16<br>Mediana: 47 | 0 a 100 puntos | **Distribución equilibrada y centrada:** Valida técnicamente fijar el umbral de corte de la clase positiva (`Hit`) en los 50 puntos. |
-| `genre` *(12 Géneros)* | ~7.080 canciones / género | 12 categorías | **Equilibrio categórico perfecto:** Cero sesgo muestral entre Pop, Rock, Reggaeton, Metal, EDM, Jazz, etc. |
-| `country` *(10 Mercados)* | ~8.500 canciones / país | 10 países | **Representatividad global:** Refleja patrones de consumo en EE.UU., México, Brasil, Reino Unido, Japón, Alemania, entre otros. |
+| **Juan Ortiz** | Líder de Datos y Preprocesamiento | **Fase 3: Preparación** | Limpieza de outliers con **IQR**, escalado `StandardScaler`, One-Hot Encoding y partición Train/Test (80/20). |
+| **Jordan Murillo** | Modelado de Clasificación | **Fase 4A: Árbol de Decisión** | Entrenamiento de `DecisionTreeClassifier`, optimización de `max_depth` (evitar overfitting), matriz de confusión y exportación de `modelo_arbol.joblib`. |
+| **Jorge Moncada** | Modelado de Clustering | **Fase 4B: K-Means** | Aplicación de K-Means, justificación de $K$ (Método del Codo y Silueta), caracterización de clusters y exportación de `modelo_kmeans.joblib`. |
+| **Jose Mendez** | Reglas de Asociación | **Fase 4C: Apriori** | Discretización de variables acústicas (BPM), ejecución de Apriori con `mlxtend`, reporte de reglas ($Lift > 1.2$, $Conf \ge 60\%$) y `reglas_apriori.json`. |
+| **Bastian Parraguez**| Desarrollador Backend | **Fase 6: API con FastAPI** | Servidor `app/main.py`, endpoints `/api/predecir` y `/api/segmentar`, validación de datos con Pydantic y configuración para Render (`Procfile`). |
+| **Vicente Muñoz** | Desarrollador Frontend | **Fase 6: UI con Bootstrap 5** | Interfaz web interactiva en modo oscuro (Bootstrap 5 Dark), conexión cliente-servidor con `fetch()`, gráficos Chart.js y Mockup de Semana 2. |
+
+---
+
+## 📊 Diagrama 1: Flujo de Trabajo del Equipo (CRISP-DM + FullStack)
+
+```mermaid
+flowchart TD
+    subgraph DS["📓 CIENCIA DE DATOS Y MODELADO (Notebook / Colab)"]
+        P1["👤 Juan Ortiz<br><b>Fase 3: Preparación de Datos</b><br>• Outliers IQR (obligatorio)<br>• StandardScaler<br>• One-Hot Encoding<br>• Train/Test Split (80/20)"]
+        P2["👤 Jordan Murillo<br><b>Fase 4A: Clasificación</b><br>• DecisionTreeClassifier<br>• Optimización max_depth<br>• Matriz de Confusión<br>• Visualización plot_tree"]
+        P3["👤 Jorge Moncada<br><b>Fase 4B: Clustering</b><br>• K-Means con scikit-learn<br>• Método del Codo y Silueta<br>• Justificación de K (3-5)<br>• Perfilado de Clusters"]
+        P4["👤 Jose Mendez<br><b>Fase 4C: Reglas de Asociación</b><br>• Apriori con mlxtend<br>• Discretización de BPM/audio<br>• Reglas: Soporte, Confianza, Lift<br>• Interpretación de Negocio"]
+    end
+
+    subgraph WEB["🚀 DESARROLLO Y DESPLIEGUE WEB (FastAPI + Bootstrap 5)"]
+        P5["👤 Bastian Parraguez<br><b>Fase 6: Backend & API</b><br>• Servidor FastAPI (main.py)<br>• Endpoints /predecir y /segmentar<br>• Carga de modelos (.joblib)<br>• Despliegue en Render"]
+        P6["👤 Vicente Muñoz<br><b>Fase 6: Frontend & Mockup</b><br>• Interfaz Bootstrap 5 Dark<br>• Consumo de API con fetch()<br>• Gráficos dinámicos (Chart.js)<br>• Capturas Mockup Semana 2"]
+    end
+
+    P1 --> P2
+    P1 --> P3
+    P1 --> P4
+    P2 --> P5
+    P3 --> P5
+    P4 --> P5
+    P5 <--> P6
+```
+
+---
+
+## 🏗️ Diagrama 2: Arquitectura del Sistema y Comunicación de Datos
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario / Analista
+    participant UI as 🖥️ Frontend (HTML + Bootstrap 5 Dark)
+    participant API as ⚙️ Backend (FastAPI / Uvicorn)
+    participant Modelo as 🧠 Modelos Serializados (.joblib)
+
+    Note over Usuario,UI: 1. Interacción del Usuario
+    Usuario->>UI: Ingresa BPM, Energía, País y Género
+    Usuario->>UI: Clic en "Analizar Canción / Segmentar"
+
+    Note over UI,API: 2. Comunicación Asíncrona (JSON)
+    UI->>API: POST /api/predecir {tempo, energy, country, genre}
+    
+    Note over API,Modelo: 3. Inferencia de Machine Learning
+    API->>API: Valida datos (Pydantic, sin trazas de error)
+    API->>Modelo: Escala variables con scaler.joblib
+    API->>Modelo: Ejecuta modelo_arbol.predict() y modelo_kmeans.predict()
+    Modelo-->>API: Retorna: Hit = Sí (78%) | Cluster = "Cardio / Alta Intensidad"
+    API->>API: Cruza con reglas_apriori.json (afinidades de mercado)
+
+    Note over API,UI: 4. Respuesta al Cliente
+    API-->>UI: JSON {es_hit: true, probabilidad: 0.78, cluster: "Cardio", recomendaciones: [...]}
+    UI->>Usuario: Actualiza tarjetas KPI, gráficos Chart.js y recomendaciones
+```
+
+---
+
+## 📁 Estructura del Repositorio
+
+```text
+Proyecto-Mineria_Datos/
+├── app/                                # Código de la aplicación web
+│   ├── main.py                         # Servidor FastAPI y endpoints
+│   ├── models/                         # Modelos entrenados (.joblib)
+│   ├── static/                         # Estilos CSS y JavaScript
+│   └── templates/                      # Plantilla HTML (Bootstrap 5 Dark)
+├── data/                               # Dataset del proyecto
+│   └── spotify_2015_2025_85k.csv       # 85.000 registros limpios en UTF-8
+├── notebook/                           # Cuadernos Google Colab
+│   └── Proyecto_Mineria_Datos.ipynb    # Código ejecutable con fases CRISP-DM
+├── docs/                               # Documentación y pautas
+│   └── Proyecto_MineriaDatos.pdf       # Pauta oficial de la asignatura
+├── .gitignore                          # Exclusión de archivos temporales
+├── requirements.txt                    # Dependencias Python
+├── Procfile                            # Archivo de arranque para Render
+└── README.md                           # Documentación central del proyecto
+```
+
+---
+
+## 🎯 Resumen de Metas de Éxito de Machine Learning
+* **Clasificación (Árbol de Decisión):** Accuracy $\ge 70\%$ con control de `max_depth` para prevenir sobreajuste (*overfitting*).
+* **Clustering (K-Means):** Entre 3 y 5 grupos justificados mediante el Método del Codo y Coeficiente de Silueta.
+* **Reglas de Asociación (Apriori):** Mínimo 3 reglas de negocio con Soporte $\ge 5\%$, Confianza $\ge 60\%$ y Lift $> 1.2$.
+* **Despliegue Web:** Aplicación accesible 24/7 en Render con respuesta menor a 2 segundos y tolerancia a errores de entrada.
