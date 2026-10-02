@@ -102,7 +102,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Ruta principal: Servir la aplicación web interactiva
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 # Endpoint de predicción y segmentación interactiva
 @app.post("/api/predecir")
