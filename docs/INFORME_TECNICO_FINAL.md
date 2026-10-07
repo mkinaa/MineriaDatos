@@ -289,6 +289,16 @@ La aplicación **SoundData Analytics** traduce los algoritmos abstractos de mine
 2. **Estandarización 100% al Español:** Se tradujeron todos los campos, gráficos, etiquetas de países ("Estados Unidos", "Reino Unido", "Alemania") y selectores para garantizar accesibilidad según los lineamientos de la rúbrica.
 3. **Módulo de Portafolio Transaccional (SQLite):** Se incorporó un sistema CRUD completo con modal interactivo para crear, editar, filtrar y eliminar canciones del portafolio directamente desde la web, garantizando persistencia real.
 
+#### Capturas de la Aplicación Final Funcionando:
+
+![Figura 6: Vista 1 - Dashboard y Análisis Global de Oyentes](docs/img/app_vista_1_analisis_oyentes.png)
+
+![Figura 7: Vista 2 - Segmentación Univariada por Atributo Individual](docs/img/app_vista_2_segmentacion_atributo.png)
+
+![Figura 8: Vista 3 - Simulador de Éxito en Tiempo Real con Inferencia ML](docs/img/app_vista_3_simulador_ml.png)
+
+![Figura 9: Vista 4 - Portafolio de Canciones y Administración CRUD en SQLite](docs/img/app_vista_4_portafolio_crud.png)
+
 ---
 
 ### 7.3 Arquitectura del Sistema
