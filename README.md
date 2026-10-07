@@ -17,10 +17,13 @@
 
 ---
 
-## 📚 Documentación Oficial del Proyecto (Rúbrica)
+## 📚 Documentación Oficial del Proyecto (Entregables)
 
-- **[Informe Técnico Final (CRISP-DM Secciones 5.1 a 5.7)](docs/INFORME_TECNICO_FINAL.md)**: Documento técnico exhaustivo con comprensión del negocio, estadísticas `.describe()`, tratamiento IQR, hiperparámetros de modelos, matriz de confusión, evaluación y decisiones de despliegue.
-- **[Estructura y Guión de la Presentación Oral (10 min)](docs/ESTRUCTURA_PRESENTACION_PPTX.md)**: Estructura diapositiva por diapositiva con asignación de tiempos para los 6 integrantes.
+- **[Informe Técnico Final en Word (Formato Académico)](docs/INFORME_TECNICO_FINAL_ACTUALIZADO.docx)**: Documento Word formal completo con todas las fases CRISP-DM, fórmulas matemáticas, gráficos científicos incrustados, tabla Jira y roles del equipo.
+- **[Informe Técnico en Markdown](docs/INFORME_TECNICO_FINAL.md)**: Versión de lectura directa en el repositorio con estadísticas `.describe()`, tratamiento IQR, hiperparámetros y matriz de confusión.
+- **[Presentación Parte 1: El Análisis CRISP-DM (PPTX)](docs/PARTE1_ANALISIS_SOUNDDATA_V2.pptx)**: Presentación ejecutiva de 9 diapositivas + 4 anexos ocultos con gráficos oscuros y guiones de orador.
+- **[Presentación Parte 2: La Aplicación Web (PPTX)](docs/PARTE2_APLICACION_SOUNDDATA_V2.pptx)**: Presentación de 7 diapositivas + 1 anexo oculto con capturas en alta resolución y ciclo CRUD.
+- **[Pauta de Correcciones Aplicada a Presentaciones](CORRECCIONES_PRESENTACIONES_SOUNDDATA.md)**: Auditoría de diseño, reglas tipográficas ($\ge 20$ pt, $\le 40$ palabras) y directivas aplicadas.
 - **[Tablero de Tareas Jira](docs/TABLERO_JIRA.md)**: 18 historias de usuario y tareas técnicas repartidas equilibradamente.
 - **[Diagramas de Arquitectura del Sistema](docs/DIAGRAMAS_ARQUITECTURA.md)**: Diagramas Mermaid de secuencia, flujo CRUD en SQLite y workflow de equipo.
 
@@ -115,8 +118,11 @@ Proyecto-Mineria_Datos/
 ├── data/
 │   └── spotify_2015_2025_85k.csv       # Catálogo de 85.000 pistas
 ├── docs/                               # Documentación oficial de entrega
+│   ├── INFORME_TECNICO_FINAL_ACTUALIZADO.docx # Informe técnico formal (Word)
 │   ├── INFORME_TECNICO_FINAL.md        # Informe técnico oficial según CRISP-DM
-│   ├── ESTRUCTURA_PRESENTACION_PPTX.md # Guión para la defensa oral de 10 min
+│   ├── PARTE1_ANALISIS_SOUNDDATA_V2.pptx      # Presentación PPTX 1: Análisis CRISP-DM
+│   ├── PARTE2_APLICACION_SOUNDDATA_V2.pptx    # Presentación PPTX 2: Aplicación Web
+│   ├── versiones previas/              # Archivo de borradores PPTX anteriores
 │   ├── TABLERO_JIRA.md                 # Historias de usuario y tareas por integrante
 │   ├── DIAGRAMAS_ARQUITECTURA.md       # Diagramas técnicos en Mermaid
 │   └── Proyecto_MineriaDatos.pdf       # Pauta y rúbrica oficial de la asignatura
