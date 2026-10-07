@@ -1,77 +1,99 @@
 # SoundData Analytics: Segmentación de Audiencias Musicales y Predicción de Éxito
-> **Metodología:** CRISP-DM | **Asignatura:** Minería de Datos (IEI-067) — Santo Tomás  
-> **Dataset Base:** `spotify_2015_2025_85k.csv` (85.000 canciones, 19 atributos, 10 países y 12 géneros)
+> **Metodología:** CRISP-DM | **Asignatura:** Minería de Datos (IEI-067) — Universidad Santo Tomás  
+> **Dataset Base:** `spotify_2015_2025_85k.csv` (85.000 canciones, 17 atributos, 10 mercados y 12 géneros)
 
 ---
 
 ## 👥 Integrantes del Equipo y Distribución de Roles
 
-| Integrante | Rol / Especialidad | Módulo CRISP-DM | Entregables Clave |
+| Integrante | Rol / Especialidad | Módulo CRISP-DM | Responsabilidades Clave |
 | :--- | :--- | :--- | :--- |
-| **Juan Ortiz** | Líder de Datos y Preprocesamiento | **Fase 3: Preparación** | Limpieza de outliers con **IQR**, escalado `StandardScaler`, One-Hot Encoding y partición Train/Test (80/20). |
-| **Jordan Murillo** | Modelado de Clasificación | **Fase 4A: Árbol de Decisión** | Entrenamiento de `DecisionTreeClassifier`, optimización de `max_depth` (evitar overfitting), matriz de confusión y exportación de `modelo_arbol.joblib`. |
-| **Jorge Moncada** | Modelado de Clustering | **Fase 4B: K-Means** | Aplicación de K-Means, justificación de $K$ (Método del Codo y Silueta), caracterización de clusters y exportación de `modelo_kmeans.joblib`. |
-| **Jose Mendez** | Reglas de Asociación | **Fase 4C: Apriori** | Discretización de variables acústicas (BPM), ejecución de Apriori con `mlxtend`, reporte de reglas ($Lift > 1.2$, $Conf \ge 60\%$) y `reglas_apriori.json`. |
-| **Bastian Parraguez**| Desarrollador Backend | **Fase 6: API con FastAPI** | Servidor `app/main.py`, endpoints `/api/predecir` y `/api/segmentar`, validación de datos con Pydantic y configuración para Render (`Procfile`). |
-| **Vicente Muñoz** | Desarrollador Frontend | **Fase 6: UI con Bootstrap 5** | Interfaz web interactiva en modo oscuro (Bootstrap 5 Dark), conexión cliente-servidor con `fetch()`, gráficos Chart.js y Mockup de Semana 2. |
+| **Vicente Muñoz** | Coordinador & Full-Stack Lead | **Fase 6: Despliegue Web** | Arquitectura general, integración frontend Bootstrap 5 Dark, conexión API y coordinación de entregables. |
+| **Juan Ortiz** | Ingeniero de Datos | **Fase 3: Preparación de Datos** | Limpieza y tratamiento de outliers con **IQR**, escalado estadístico `StandardScaler`, codificación y partición 80/20. |
+| **Jordan Murillo** | Científico de Datos (Asociación) | **Fase 4A: Reglas Apriori** | Discretización de transacciones, ejecución de Apriori con `mlxtend`, filtrado de reglas ($Lift > 3.3$, $Conf \ge 60\%$) y serialización en `reglas_apriori.json`. |
+| **Jorge Moncada** | Científico de Datos (Clustering) | **Fase 4B: K-Means** | Agrupamiento con Scikit-Learn, justificación de $K=4$ (Método del Codo y Coeficiente de Silueta) y caracterización de arquetipos sonoros. |
+| **Jose Mendez** | Especialista Machine Learning | **Fase 4C: Árbol de Decisión** | Entrenamiento de `DecisionTreeClassifier`, optimización de `max_depth=3` para prevenir sobreajuste, matriz de confusión y `modelo_arbol.joblib`. |
+| **Bastian Parraguez**| Ingeniero de QA y Despliegue | **Fase 6: Backend & Calidad** | Servidor FastAPI (`app/main.py`), persistencia SQLite (`app/database.py`), suite de pruebas unitarias (`pytest`) y configuración para Render (`Procfile`). |
 
 ---
 
-## 📊 Diagrama 1: Flujo de Trabajo del Equipo (CRISP-DM + FullStack)
+## 📚 Documentación Oficial del Proyecto (Rúbrica)
 
-```mermaid
-flowchart TD
-    subgraph DS["📓 CIENCIA DE DATOS Y MODELADO (Notebook / Colab)"]
-        P1["👤 Juan Ortiz<br><b>Fase 3: Preparación de Datos</b><br>• Outliers IQR (obligatorio)<br>• StandardScaler<br>• One-Hot Encoding<br>• Train/Test Split (80/20)"]
-        P2["👤 Jordan Murillo<br><b>Fase 4A: Clasificación</b><br>• DecisionTreeClassifier<br>• Optimización max_depth<br>• Matriz de Confusión<br>• Visualización plot_tree"]
-        P3["👤 Jorge Moncada<br><b>Fase 4B: Clustering</b><br>• K-Means con scikit-learn<br>• Método del Codo y Silueta<br>• Justificación de K (3-5)<br>• Perfilado de Clusters"]
-        P4["👤 Jose Mendez<br><b>Fase 4C: Reglas de Asociación</b><br>• Apriori con mlxtend<br>• Discretización de BPM/audio<br>• Reglas: Soporte, Confianza, Lift<br>• Interpretación de Negocio"]
-    end
-
-    subgraph WEB["🚀 DESARROLLO Y DESPLIEGUE WEB (FastAPI + Bootstrap 5)"]
-        P5["👤 Bastian Parraguez<br><b>Fase 6: Backend & API</b><br>• Servidor FastAPI (main.py)<br>• Endpoints /predecir y /segmentar<br>• Carga de modelos (.joblib)<br>• Despliegue en Render"]
-        P6["👤 Vicente Muñoz<br><b>Fase 6: Frontend & Mockup</b><br>• Interfaz Bootstrap 5 Dark<br>• Consumo de API con fetch()<br>• Gráficos dinámicos (Chart.js)<br>• Capturas Mockup Semana 2"]
-    end
-
-    P1 --> P2
-    P1 --> P3
-    P1 --> P4
-    P2 --> P5
-    P3 --> P5
-    P4 --> P5
-    P5 <--> P6
-```
+- **[Informe Técnico Final (CRISP-DM Secciones 5.1 a 5.7)](docs/INFORME_TECNICO_FINAL.md)**: Documento técnico exhaustivo con comprensión del negocio, estadísticas `.describe()`, tratamiento IQR, hiperparámetros de modelos, matriz de confusión, evaluación y decisiones de despliegue.
+- **[Estructura y Guión de la Presentación Oral (10 min)](docs/ESTRUCTURA_PRESENTACION_PPTX.md)**: Estructura diapositiva por diapositiva con asignación de tiempos para los 6 integrantes.
+- **[Tablero de Tareas Jira](docs/TABLERO_JIRA.md)**: 18 historias de usuario y tareas técnicas repartidas equilibradamente.
+- **[Diagramas de Arquitectura del Sistema](docs/DIAGRAMAS_ARQUITECTURA.md)**: Diagramas Mermaid de secuencia, flujo CRUD en SQLite y workflow de equipo.
 
 ---
 
-## 🏗️ Diagrama 2: Arquitectura del Sistema y Comunicación de Datos
+## 🏗️ Arquitectura del Sistema y Comunicación de Datos
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Usuario as 👤 Usuario / Analista
+    actor Usuario as 👤 Analista Musical
     participant UI as 🖥️ Frontend (HTML + Bootstrap 5 Dark)
     participant API as ⚙️ Backend (FastAPI / Uvicorn)
-    participant Modelo as 🧠 Modelos Serializados (.joblib)
+    participant Motor as 🧠 Inferencia ML (Joblib / Scaler)
+    participant BD as 🗄️ Base de Datos SQLite (sounddata.db)
 
-    Note over Usuario,UI: 1. Interacción del Usuario
-    Usuario->>UI: Ingresa BPM, Energía, País y Género
-    Usuario->>UI: Clic en "Analizar Canción / Segmentar"
+    Note over Usuario,UI: 1. Simulación Acústica
+    Usuario->>UI: Ajusta sliders (BPM, Energía, Bailabilidad, etc.)
+    Usuario->>UI: Clic en "Evaluar Potencial de Canción"
+    UI->>API: POST /api/predecir {tempo, danceability, energy, loudness, instrumentalness, explicit}
+    API->>Motor: Normaliza con Scaler y evalúa con Árbol + K-Means + Apriori
+    Motor-->>API: Probabilidad de éxito (%), Cluster Asignado y Reglas de Mercado
+    API-->>UI: 200 OK (JSON estructurado)
+    UI->>Usuario: Actualiza medidor de éxito, badge de cluster y consejos de negocio
 
-    Note over UI,API: 2. Comunicación Asíncrona (JSON)
-    UI->>API: POST /api/predecir {tempo, energy, country, genre}
-    
-    Note over API,Modelo: 3. Inferencia de Machine Learning
-    API->>API: Valida datos (Pydantic, sin trazas de error)
-    API->>Modelo: Escala variables con scaler.joblib
-    API->>Modelo: Ejecuta modelo_arbol.predict() y modelo_kmeans.predict()
-    Modelo-->>API: Retorna: Hit = Sí (78%) | Cluster = "Cardio / Alta Intensidad"
-    API->>API: Cruza con reglas_apriori.json (afinidades de mercado)
-
-    Note over API,UI: 4. Respuesta al Cliente
-    API-->>UI: JSON {es_hit: true, probabilidad: 0.78, cluster: "Cardio", recomendaciones: [...]}
-    UI->>Usuario: Actualiza tarjetas KPI, gráficos Chart.js y recomendaciones
+    Note over Usuario,BD: 2. Registro en Portafolio
+    Usuario->>UI: Clic en "Guardar Canción en Portafolio"
+    UI->>API: POST /api/canciones (Datos de la canción)
+    API->>BD: INSERT INTO canciones (...)
+    BD-->>API: Confirmación de registro exitoso
+    API-->>UI: 201 Created
+    UI->>Usuario: Refresca la tabla interactiva sin recargar la página
 ```
+
+---
+
+## 🚀 Guía de Instalación y Ejecución Local
+
+### 1. Clonar el repositorio y acceder a la carpeta
+```bash
+git clone https://github.com/mkinaa/MineriaDatos.git
+cd MineriaDatos
+```
+
+### 2. Crear y activar el entorno virtual
+En Windows (PowerShell):
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+En Linux / macOS:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Instalar las dependencias
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Ejecutar la suite de pruebas unitarias
+```bash
+pytest -v
+```
+*(Debe reportar los 17 tests aprobados al 100%).*
+
+### 5. Iniciar el servidor web local
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+Abre tu navegador en: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
@@ -79,27 +101,33 @@ sequenceDiagram
 
 ```text
 Proyecto-Mineria_Datos/
-├── app/                                # Código de la aplicación web
-│   ├── main.py                         # Servidor FastAPI y endpoints
-│   ├── models/                         # Modelos entrenados (.joblib)
-│   ├── static/                         # Estilos CSS y JavaScript
-│   └── templates/                      # Plantilla HTML (Bootstrap 5 Dark)
-├── data/                               # Dataset del proyecto
-│   └── spotify_2015_2025_85k.csv       # 85.000 registros limpios en UTF-8
-├── notebook/                           # Cuadernos Google Colab
-│   └── Proyecto_Mineria_Datos.ipynb    # Código ejecutable con fases CRISP-DM
-├── docs/                               # Documentación y pautas
-│   └── Proyecto_MineriaDatos.pdf       # Pauta oficial de la asignatura
-├── .gitignore                          # Exclusión de archivos temporales
-├── requirements.txt                    # Dependencias Python
-├── Procfile                            # Archivo de arranque para Render
-└── README.md                           # Documentación central del proyecto
+├── app/                                # Aplicación web Full-Stack
+│   ├── database.py                     # Gestión y persistencia transaccional SQLite
+│   ├── main.py                         # API FastAPI, esquemas Pydantic y endpoints
+│   ├── models/                         # Modelos y transformadores serializados
+│   │   ├── modelo_arbol.joblib         # Árbol de decisión clasificador (max_depth=3)
+│   │   ├── modelo_kmeans.joblib        # K-Means clustering (K=4)
+│   │   ├── scaler.joblib               # StandardScaler entrenado sobre 6 features
+│   │   └── reglas_apriori.json         # Reglas de asociación minadas con mlxtend
+│   ├── static/                         # Estilos y recursos visuales
+│   └── templates/
+│       └── index.html                  # Interfaz Bootstrap 5 Dark 100% en español
+├── data/
+│   └── spotify_2015_2025_85k.csv       # Catálogo de 85.000 pistas
+├── docs/                               # Documentación oficial de entrega
+│   ├── INFORME_TECNICO_FINAL.md        # Informe técnico oficial según CRISP-DM
+│   ├── ESTRUCTURA_PRESENTACION_PPTX.md # Guión para la defensa oral de 10 min
+│   ├── TABLERO_JIRA.md                 # Historias de usuario y tareas por integrante
+│   ├── DIAGRAMAS_ARQUITECTURA.md       # Diagramas técnicos en Mermaid
+│   └── Proyecto_MineriaDatos.pdf       # Pauta y rúbrica oficial de la asignatura
+├── notebook/
+│   └── Proyecto_Mineria_Datos.ipynb    # Notebook Colab comentado línea por línea
+├── tests/                              # Suite de pruebas unitarias con Pytest
+│   ├── test_api.py                     # Tests de endpoints HTTP y validación
+│   ├── test_database.py                # Tests del ciclo CRUD en SQLite
+│   └── test_modelos.py                 # Tests de carga e inferencia de modelos
+├── .gitignore
+├── requirements.txt                    # Dependencias de producción y pruebas
+├── Procfile                            # Archivo de despliegue para Render
+└── README.md                           # Documentación principal
 ```
-
----
-
-## 🎯 Resumen de Metas de Éxito de Machine Learning
-* **Clasificación (Árbol de Decisión):** Accuracy $\ge 70\%$ con control de `max_depth` para prevenir sobreajuste (*overfitting*).
-* **Clustering (K-Means):** Entre 3 y 5 grupos justificados mediante el Método del Codo y Coeficiente de Silueta.
-* **Reglas de Asociación (Apriori):** Mínimo 3 reglas de negocio con Soporte $\ge 5\%$, Confianza $\ge 60\%$ y Lift $> 1.2$.
-* **Despliegue Web:** Aplicación accesible 24/7 en Render con respuesta menor a 2 segundos y tolerancia a errores de entrada.

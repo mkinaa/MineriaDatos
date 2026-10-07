@@ -28,3 +28,7 @@ $RECYCLE.BIN/
 # Visual Studio Code / IDEs
 .vscode/
 .idea/
+
+# SQLite & Pytest
+*.db
+.pytest_cache/
