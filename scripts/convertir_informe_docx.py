@@ -237,22 +237,57 @@ def crear_documento_word():
         # Listas con viñetas
         if linea_str.strip().startswith("- ") or linea_str.strip().startswith("* "):
             p = doc.add_paragraph(style='List Bullet')
-            p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(1.5)
+            p.paragraph_format.space_after = Pt(2.5)
             texto_vi = re.sub(r"^[\-\*]\s+", "", linea_str.strip())
             
-            # Formateo inline básico (**negrita**)
-            partes = re.split(r"(\*\*.*?\*\*)", texto_vi)
+            # Formateo inline (**negrita** y *cursiva*)
+            partes = re.split(r"(\*\*.*?\*\*|\*.*?\*)", texto_vi)
             for part in partes:
                 if part.startswith("**") and part.endswith("**"):
                     r = p.add_run(part[2:-2])
                     r.bold = True
                     r.font.size = Pt(10)
+                    r.font.color.rgb = COLOR_TITULO
+                elif part.startswith("*") and part.endswith("*"):
+                    r = p.add_run(part[1:-1])
+                    r.italic = True
+                    r.font.size = Pt(9.5)
+                    r.font.color.rgb = COLOR_SUBTITULO
                 else:
                     limpio = part.replace("`", "").replace("$$", "").replace("$", "")
                     r = p.add_run(limpio)
                     r.font.size = Pt(10)
-                r.font.color.rgb = COLOR_TEXTO
+                    r.font.color.rgb = COLOR_TEXTO
+            continue
+
+        # Bloques de fórmula o llamada destacada (> ...)
+        if linea_str.strip().startswith(">"):
+            texto_cita = re.sub(r"^>\s*", "", linea_str.strip())
+            p = doc.add_paragraph()
+            p.paragraph_format.left_indent = Inches(0.3)
+            p.paragraph_format.right_indent = Inches(0.3)
+            p.paragraph_format.space_before = Pt(4)
+            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.line_spacing = 1.15
+            
+            partes = re.split(r"(\*\*.*?\*\*|\*.*?\*)", texto_cita)
+            for part in partes:
+                if part.startswith("**") and part.endswith("**"):
+                    r = p.add_run(part[2:-2])
+                    r.bold = True
+                    r.font.size = Pt(10.5)
+                    r.font.color.rgb = COLOR_TITULO
+                elif part.startswith("*") and part.endswith("*"):
+                    r = p.add_run(part[1:-1])
+                    r.italic = True
+                    r.font.size = Pt(9.5)
+                    r.font.color.rgb = COLOR_SUBTITULO
+                else:
+                    limpio = part.replace("`", "").replace("$$", "").replace("$", "")
+                    r = p.add_run(limpio)
+                    r.font.size = Pt(10)
+                    r.font.color.rgb = COLOR_TEXTO
             continue
 
         # Imágenes Markdown ![Caption](path)
@@ -318,8 +353,13 @@ def crear_documento_word():
 
     # Guardar documento
     output_docx = os.path.join("docs", "INFORME_TECNICO_FINAL.docx")
-    doc.save(output_docx)
-    print(f"Documento Word creado exitosamente en: {output_docx}")
+    try:
+        doc.save(output_docx)
+        print(f"Documento Word creado exitosamente en: {output_docx}")
+    except PermissionError:
+        output_alt = os.path.join("docs", "INFORME_TECNICO_FINAL_ACTUALIZADO.docx")
+        doc.save(output_alt)
+        print(f"AVISO: {output_docx} esta abierto en Word. Se guardo la version actualizada en: {output_alt}")
 
 if __name__ == "__main__":
     crear_documento_word()
