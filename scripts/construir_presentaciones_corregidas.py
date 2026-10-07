@@ -615,10 +615,8 @@ def construir_parte1_crisp():
 
         add_speaker_notes(s_anx, "Diapositiva oculta reservada para responder preguntas técnicas del jurado.")
 
-    out1 = os.path.join("docs", "PRESENTACION_PROYECTO_CRISP_DM.pptx")
+    out1 = os.path.join("docs", "PARTE1_ANALISIS_SOUNDDATA_V2.pptx")
     prs.save(out1)
-    # También copia como PARTE1_ANALISIS_SOUNDDATA_V2.pptx
-    shutil.copyfile(out1, os.path.join("docs", "PARTE1_ANALISIS_SOUNDDATA_V2.pptx"))
     print(f"Parte 1 guardada en: {out1}")
 
 # ==============================================================================
@@ -858,9 +856,8 @@ def construir_parte2_app():
         s_a5.shapes.add_picture(img_arq, Inches(2.5), Inches(1.9), Inches(8.3))
     add_speaker_notes(s_a5, "Diapositiva oculta para preguntas sobre FastAPI, SQLite y Pytest.")
 
-    out2 = os.path.join("docs", "PRESENTACION_APLICACION_WEB.pptx")
+    out2 = os.path.join("docs", "PARTE2_APLICACION_SOUNDDATA_V2.pptx")
     prs.save(out2)
-    shutil.copyfile(out2, os.path.join("docs", "PARTE2_APLICACION_SOUNDDATA_V2.pptx"))
     print(f"Parte 2 guardada en: {out2}")
 
 if __name__ == "__main__":
