@@ -255,6 +255,44 @@ def crear_documento_word():
                 r.font.color.rgb = COLOR_TEXTO
             continue
 
+        # Imágenes Markdown ![Caption](path)
+        img_match = re.match(r"^!\[(.*?)\]\((.*?)\)", linea_str.strip())
+        if img_match:
+            caption_text = img_match.group(1)
+            raw_path = img_match.group(2)
+            
+            candidatos = [
+                raw_path,
+                os.path.join("docs", raw_path),
+                os.path.join("docs", raw_path.replace("docs/", "").replace("docs\\", "")),
+                raw_path.replace("docs/", "").replace("docs\\", "")
+            ]
+            real_img_path = next((p for p in candidatos if os.path.exists(p)), None)
+
+            if real_img_path:
+                w = Inches(6.0)
+                if "matriz" in real_img_path.lower():
+                    w = Inches(4.2)
+                elif "arbol" in real_img_path.lower():
+                    w = Inches(6.3)
+                
+                p_img = doc.add_paragraph()
+                p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p_img.paragraph_format.space_before = Pt(10)
+                p_img.paragraph_format.space_after = Pt(2)
+                r_img = p_img.add_run()
+                r_img.add_picture(real_img_path, width=w)
+
+                p_cap = doc.add_paragraph()
+                p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p_cap.paragraph_format.space_before = Pt(2)
+                p_cap.paragraph_format.space_after = Pt(12)
+                r_cap = p_cap.add_run(caption_text)
+                r_cap.font.size = Pt(8.5)
+                r_cap.font.italic = True
+                r_cap.font.color.rgb = COLOR_SUBTITULO
+            continue
+
         # Líneas horizontales separadoras
         if linea_str.strip() in ["---", "***"]:
             continue

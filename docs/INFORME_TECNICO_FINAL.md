@@ -90,6 +90,8 @@ max          218.400000      0.985000      0.999000     -0.800000          0.995
 1. **Asimetría en la variable de streams:** El número de reproducciones presenta una fuerte asimetría positiva (*right-skewed*), donde el 25% superior de canciones concentra más del 68% de las reproducciones totales de la plataforma. Por ello, se definió el percentil 75 ($Q_3 \approx 85.200.000$ reproducciones) como el umbral de corte para definir formalmente la clase objetivo `es_exito`.
 2. **Correlación Acústica:** Existe una correlación positiva moderada entre `energy` y `loudness` ($r = +0.72$), mientras que `instrumentalness` exhibe correlación negativa con `popularity` ($r = -0.34$), reflejando que el público masivo prefiere temas con presencia vocal dominante.
 
+![Figura 1: Distribución Asimétrica de Reproducciones y Espacio Acústico (Bailabilidad vs. Energía)](docs/img/distribucion_streams.png)
+
 ---
 
 ## 3. Fase 3: Preparación de los Datos (15%)
@@ -162,6 +164,8 @@ Se evaluaron valores de $K \in [2, 8]$ mediante dos métodos cuantitativos:
 1. **Método del Codo (Elbow Method):** La curva de suma de distancias al cuadrado intracluster (Inercia) evidenció una marcada desaceleración en la tasa de reducción de error a partir de $K=4$ (pasando de una reducción pronunciada entre 2 y 4 a una asíntota suave entre 5 y 8).
 2. **Coeficiente de Silueta:** El valor promedio de silueta alcanzó su punto de mayor estabilidad y coherencia de separación geométrica en $K=4$ ($\text{Silhouette Score} \approx 0.38$).
 
+![Figura 2: Justificación Cuantitativa de K=4 mediante Método del Codo e Índice de Silueta](docs/img/metodo_codo_silueta.png)
+
 #### Descripción y Perfil de los 4 Clusters de Canciones:
 - **Cluster 0 — "Acústico, Instrumental & Chill" (Baja Energía, Alta Instrumentalidad):** Temas con baja sonoridad y casi nula presencia vocal. Destinados a listas de concentración, estudio o meditación.
 - **Cluster 1 — "Pop Comercial & Radio FM" (Alta Bailabilidad, Energía Media-Alta, No Explícito):** Estructuras sonoras diseñadas para el gran consumo, alta rotación radial y playlists virales.
@@ -182,6 +186,8 @@ Se evaluaron profundidades máximas (`max_depth`) entre 2 y 15 para monitorear e
   1. Regularización intrínseca contra el ruido acústico.
   2. Una estructura visual jerárquica de 8 nodos hoja interpretables por seres humanos.
   3. Desempeño balanceado y libre de memorización sobre datos nunca antes vistos.
+
+![Figura 3: Estructura Jerárquica del Árbol de Decisión Entrenado (Profundidad Máxima = 3)](docs/img/arbol_decision_grafico.png)
 
 #### Matriz de Confusión en Prueba (17.000 registros):
 ```
@@ -208,6 +214,8 @@ El Árbol de Decisión alcanzó una **Exactitud Global (Accuracy) del $57.95\%$*
 | **Clase 0 (Estándar)** | $0.74$ | $0.66$ | $0.70$ | $12.521$ |
 | **Clase 1 (Éxito)** | $0.27$ | $0.36$ | $0.31$ | $4.479$ |
 | **Promedio Ponderado** | **$0.62$** | **$0.58$** | **$0.60$** | **$17.000$** |
+
+![Figura 4: Mapa de Calor de la Matriz de Confusión en Prueba Independiente](docs/img/matriz_confusion.png)
 
 ### 5.2 ¿Por qué se obtuvieron estas métricas?
 - La precisión para la clase de no éxito es sólida ($74\%$), lo cual permite descartar proyectos de baja probabilidad de impacto comercial con confianza.
@@ -279,6 +287,8 @@ La aplicación **SoundData Analytics** traduce los algoritmos abstractos de mine
 
 ### 7.3 Arquitectura del Sistema
 El sistema opera bajo un patrón cliente-servidor con arquitectura desacoplada:
+
+![Figura 5: Diagrama de Arquitectura de la Plataforma SoundData Analytics](docs/img/arquitectura_sistema.png)
 
 ```mermaid
 sequenceDiagram
