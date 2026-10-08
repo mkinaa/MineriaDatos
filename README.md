@@ -23,6 +23,8 @@
 - **[Informe Técnico en Markdown](docs/INFORME_TECNICO_FINAL.md)**: Versión de lectura directa en el repositorio con estadísticas `.describe()`, tratamiento IQR, hiperparámetros y matriz de confusión.
 - **[Presentación Parte 1: El Análisis CRISP-DM (PPTX)](docs/PARTE1_ANALISIS_SOUNDDATA_V2.pptx)**: Presentación ejecutiva de 9 diapositivas + 4 anexos ocultos con gráficos oscuros y guiones de orador.
 - **[Presentación Parte 2: La Aplicación Web (PPTX)](docs/PARTE2_APLICACION_SOUNDDATA_V2.pptx)**: Presentación de 7 diapositivas + 1 anexo oculto con capturas en alta resolución y ciclo CRUD.
+- **[Guion Oficial de la Defensa en Word (DOCX)](docs/GUION_OFICIAL_DEFENSA_ORAL.docx)**: Guion completo para los 6 integrantes con tiempos, diapositiva por diapositiva, cajas de parlamento y respuestas a preguntas del jurado.
+- **[Guion Oficial de la Defensa en Markdown](docs/GUION_PRESENTACIONES_SOUNDDATA.md)**: Versión de lectura web directa del guion con tiempos y roles.
 - **[Pauta de Correcciones Aplicada a Presentaciones](CORRECCIONES_PRESENTACIONES_SOUNDDATA.md)**: Auditoría de diseño, reglas tipográficas ($\ge 20$ pt, $\le 40$ palabras) y directivas aplicadas.
 - **[Tablero de Tareas Jira](docs/TABLERO_JIRA.md)**: 18 historias de usuario y tareas técnicas repartidas equilibradamente.
 - **[Diagramas de Arquitectura del Sistema](docs/DIAGRAMAS_ARQUITECTURA.md)**: Diagramas Mermaid de secuencia, flujo CRUD en SQLite y workflow de equipo.
